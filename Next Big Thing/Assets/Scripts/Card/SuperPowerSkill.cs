@@ -1,0 +1,1 @@
+﻿namespace Card{    public enum SuperPowerSkill    {        Programming,        Design,        Accounting,        Legal,        Marketing,        PublicRelations,        Sales,        YourChoice    }}

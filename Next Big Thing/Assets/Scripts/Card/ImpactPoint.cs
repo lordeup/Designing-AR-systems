@@ -1,0 +1,1 @@
+﻿namespace Card{    public class ImpactPoint    {        public ImpactPoint(string name, string description, double point)        {            Name = name;            Description = description;            Point = point;        }        public string Name { get; set; }        public string Description { get; set; }        public double Point { get; set; }    }}

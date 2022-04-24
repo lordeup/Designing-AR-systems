@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QCARConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="qcar_config.xsd">
+  <Tracking>
+    <ImageTarget name="FormerAccountant" size="0.800000 1.082597" />
+    <ImageTarget name="FormerDesigner" size="0.800000 1.089764" />
+    <ImageTarget name="CollegeDropout" size="0.800000 1.080656" />
+  </Tracking>
+</QCARConfig>

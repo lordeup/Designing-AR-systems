@@ -1,0 +1,1 @@
+﻿namespace Card{    public class CompanyCard    {        public CompanyCard(string industry, double money)        {            Industry = industry;            Money = money;        }        public string Industry { get; set; }        public double Money { get; set; }    }}
