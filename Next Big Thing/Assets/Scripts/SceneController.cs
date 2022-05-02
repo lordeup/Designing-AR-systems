@@ -5,8 +5,6 @@ using UnityEngine.SceneManagement;
 
 public class SceneController : MonoBehaviourPunCallbacks
 {
-    public static readonly bool IsMobile = false;
-
     public static void LoadScene(string sceneName)
     {
         SceneManager.LoadScene(sceneName);
