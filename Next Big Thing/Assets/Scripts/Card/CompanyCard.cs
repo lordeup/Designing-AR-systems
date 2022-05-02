@@ -1,1 +1,17 @@
-﻿namespace Card{    public class CompanyCard    {        public CompanyCard(string industry, double money)        {            Industry = industry;            Money = money;        }        public string Industry { get; set; }        public double Money { get; set; }    }}
+using Card.Type;
+
+namespace Card
+{
+    public class CompanyCard
+    {
+        public CompanyCard(CompanyCardType type, double money)
+        {
+            Type = type;
+            Money = money;
+        }
+
+        public CompanyCardType Type { get; set; }
+
+        public double Money { get; set; }
+    }
+}

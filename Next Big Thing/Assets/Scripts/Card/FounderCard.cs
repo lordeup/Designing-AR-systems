@@ -1,1 +1,20 @@
-﻿namespace Card{    public class FounderCard    {        public FounderCard(string profession, SuperPowerSkill skill, double money)        {            Profession = profession;            Skill = skill;            Money = money;        }        public string Profession { get; set; }        public SuperPowerSkill Skill { get; set; }        public double Money { get; set; }    }}
+using Card.Type;
+
+namespace Card
+{
+    public class FounderCard
+    {
+        public FounderCard(FounderCardType type, SuperPowerSkill skill, double money)
+        {
+            Type = type;
+            Skill = skill;
+            Money = money;
+        }
+
+        public FounderCardType Type { get; set; }
+
+        public SuperPowerSkill Skill { get; set; }
+
+        public double Money { get; set; }
+    }
+}

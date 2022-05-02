@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Tracking
 {
-    public class Recognizer<T> : MonoBehaviour
+    public abstract class Recognizer<T> : MonoBehaviour
     {
         public void AddListenerToCard(Action<T> onFoundEvent)
         {
