@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using Card;
 using Card.Type;
 using UnityEngine;
+using Photon.Pun;
+using Hashtable = ExitGames.Client.Photon.Hashtable;
 
 public class GameStorage : MonoBehaviour
 {
@@ -15,6 +17,18 @@ public class GameStorage : MonoBehaviour
         InitializeCompanyCards();
         InitializeImpactPoints();
     }
+    
+    // TODO
+    /*public Hashtable GenerateCustomRoomProperties()
+    {
+        var properties = new Hashtable
+        {
+            { CustomPropertyKeys.FounderCards.ToString(), _founderCards.ToArray() },
+            { CustomPropertyKeys.CompanyCards.ToString(), _companyCards.ToArray() },
+            { CustomPropertyKeys.ImpactPoints.ToString(), _impactPoints.ToArray() },
+        };
+        return properties;
+    }*/
 
     public FounderCard GetFounderCardByType(FounderCardType type)
     {
@@ -30,6 +44,11 @@ public class GameStorage : MonoBehaviour
     {
         return _impactPoints.Find(item => item.Type == type);
     }
+    
+    /*private Hashtable GetPhotonHashtable()
+    {
+        return PhotonNetwork.CurrentRoom.CustomProperties;
+    }*/
 
     private void InitializeFounderCards()
     {

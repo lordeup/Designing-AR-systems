@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QCARConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="qcar_config.xsd">
+  <Tracking>
+    <ImageTarget name="Transportation" size="0.100000 0.106522" />
+    <ImageTarget name="SuperSecretScienceTech" size="0.100000 0.132800" />
+    <ImageTarget name="SocialNetwork" size="0.100000 0.070667" />
+    <ImageTarget name="Retail" size="0.100000 0.121571" />
+    <ImageTarget name="RealEstate" size="0.100000 0.142987" />
+    <ImageTarget name="MediaMarketing" size="0.100000 0.140042" />
+    <ImageTarget name="EntertainmentGaming" size="0.100000 0.100000" />
+    <ImageTarget name="EducationTech" size="0.100000 0.142612" />
+    <ImageTarget name="BusinessToConsumer" size="0.100000 0.129505" />
+    <ImageTarget name="BusinessToBusiness" size="0.100000 0.120047" />
+  </Tracking>
+</QCARConfig>

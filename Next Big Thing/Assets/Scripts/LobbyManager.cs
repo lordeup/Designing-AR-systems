@@ -6,22 +6,22 @@ public class LobbyManager : MonoBehaviourPunCallbacks
 {
     private const string GameSceneName = "Game";
 
-    // TODO remove
-    // private MazeGenerator _mazeGenerator;
-
+    // TODO
+    // private GameStorage _gameStorage;
+    //
     // private void Start()
     // {
-    //     _mazeGenerator = gameObject.AddComponent<MazeGenerator>();
+    //     _gameStorage = gameObject.AddComponent<GameStorage>();
     // }
 
     public void CreateRoom()
     {
-        // _mazeGenerator.Initialize();
+        // _gameStorage.Initialize();
         var roomOptions = new RoomOptions
         {
             MaxPlayers = 2,
+            // CustomRoomProperties = _gameStorage.GenerateCustomRoomProperties()
             // PublishUserId = true
-            // CustomRoomProperties = _mazeGenerator.GenerateCustomRoomProperties()
         };
 
         PhotonNetwork.CreateRoom(null, roomOptions);
