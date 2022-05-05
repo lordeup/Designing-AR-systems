@@ -1,6 +1,8 @@
 using System;
 using UnityEngine;
 using Card.Type;
+using Player;
+using Room;
 using Tracking.CompanyCard;
 using Tracking.FounderCard;
 using Tracking.ImpactPoint;
@@ -54,7 +56,8 @@ public class MultiplayerGameManager : MonoBehaviour
         if (SceneController.IsNull(player)) return;
 
         var playerPosition = new Vector3(0, 0, 0.45f);
-        PhotonNetwork.Instantiate(player.name, playerPosition, Quaternion.identity);
+        Instantiate(player, playerPosition, Quaternion.identity);
+        // PhotonNetwork.Instantiate(player.name, playerPosition, Quaternion.identity);
     }
 
     private Transform GetPlayer(PlayerType playerType)
