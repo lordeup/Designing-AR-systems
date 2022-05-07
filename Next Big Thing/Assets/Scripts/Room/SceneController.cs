@@ -7,7 +7,7 @@ namespace Room
 {
     public class SceneController : MonoBehaviourPunCallbacks
     {
-        public const bool IsMobile = false;
+        public const bool IsMobile = true;
 
         public static void LoadScene(string sceneName)
         {

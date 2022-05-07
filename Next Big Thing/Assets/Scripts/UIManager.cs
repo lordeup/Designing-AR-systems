@@ -3,11 +3,11 @@ using TMPro;
 
 public class UIManager : MonoBehaviour
 {
-    public TextMeshProUGUI logText;
+    [SerializeField] private TextMeshProUGUI logText;
 
     public void Log(string message)
     {
         Debug.Log(message);
-        logText.text += "\n" + message;
+        logText.text = message;
     }
 }

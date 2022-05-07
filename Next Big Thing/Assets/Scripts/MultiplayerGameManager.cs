@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
 using Card.Type;
+using Field;
 using Player;
 using Room;
 using Tracking.CompanyCard;
@@ -15,6 +16,8 @@ public class MultiplayerGameManager : MonoBehaviour
     [SerializeField] private CompanyCardRecognizer companyCardRecognizer;
     [SerializeField] private FounderCardRecognizer founderCardRecognizer;
     [SerializeField] private ImpactPointRecognizer impactPointRecognizer;
+    [SerializeField] private UIManager uiManager;
+    [SerializeField] private FieldManager fieldManager;
 
     private GameStorage _storage;
     private PlayerType _playerType;
@@ -33,21 +36,21 @@ public class MultiplayerGameManager : MonoBehaviour
 
     private void SetCompanyCard(CompanyCardType type)
     {
-        Debug.Log("Company card: " + type);
         var card = _storage.GetCompanyCardByType(type);
+        uiManager.Log(type.ToString());
     }
 
     private void SetFounderCard(FounderCardType type)
     {
         Debug.Log("Founder card: " + type);
         var card = _storage.GetFounderCardByType(type);
-        Debug.Log("card: " + card.Money);
+        uiManager.Log(type.ToString());
     }
 
     private void SetImpactPoint(ImpactPointType type)
     {
-        Debug.Log("Impact point: " + type);
         var card = _storage.GetImpactPointByType(type);
+        uiManager.Log(type.ToString());
     }
 
     private void InitializationPlayers()
@@ -56,7 +59,7 @@ public class MultiplayerGameManager : MonoBehaviour
         if (SceneController.IsNull(player)) return;
 
         var playerPosition = new Vector3(0, 0, 0.45f);
-        Instantiate(player, playerPosition, Quaternion.identity);
+        // Instantiate(player, playerPosition, Quaternion.identity);
         // PhotonNetwork.Instantiate(player.name, playerPosition, Quaternion.identity);
     }
 
