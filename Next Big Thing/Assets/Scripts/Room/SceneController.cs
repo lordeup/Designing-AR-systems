@@ -7,8 +7,6 @@ namespace Room
 {
     public class SceneController : MonoBehaviourPunCallbacks
     {
-        public const bool IsMobile = true;
-
         public static void LoadScene(string sceneName)
         {
             SceneManager.LoadScene(sceneName);
@@ -20,11 +18,6 @@ namespace Room
         {
             yield return new WaitForSeconds(second);
             method?.Invoke();
-        }
-
-        public static bool IsNull(Object obj)
-        {
-            return obj == null;
         }
 
         public override void OnLeftRoom()

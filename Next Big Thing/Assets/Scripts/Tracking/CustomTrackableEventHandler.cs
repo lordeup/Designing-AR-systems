@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Photon.Pun;
-using Room;
 using UnityEngine;
 
 namespace Tracking
@@ -16,7 +15,7 @@ namespace Tracking
             _gameController = FindObjectOfType<MultiplayerGameManager>();
             _field = GameObject.FindGameObjectWithTag(GameObjectTag.Field.ToString());
 
-            if (!SceneController.IsMobile) return;
+            if (!Utils.IsMobile) return;
 
             _gameController.enabled = false;
             _field.SetActive(false);
@@ -24,26 +23,19 @@ namespace Tracking
 
         private void Update()
         {
-            if (SceneController.IsMobile)
+            if (PhotonNetwork.IsMasterClient || !gameObject.scene.isLoaded || !Utils.IsMobile)
             {
-                // HidingPlayers();
+                return;
             }
-        }
 
-        private void HidingPlayers()
-        {
-            if (PhotonNetwork.IsMasterClient || !gameObject.scene.isLoaded) return;
-
-            _photonViews = FindPhotonViews();
-            SetActivePhotonViews(_photonViews, false);
+            HidingPlayers();
         }
 
         protected override void OnTrackingLost()
         {
             if (mObserverBehaviour)
             {
-                // _photonViews = FindPhotonViews();
-                // SetActivePhotonViews(_photonViews, false);
+                HidingPlayers();
             }
 
             OnTargetLost?.Invoke();
@@ -51,7 +43,7 @@ namespace Tracking
 
         protected override void OnTrackingFound()
         {
-            if (mObserverBehaviour && SceneController.IsMobile)
+            if (mObserverBehaviour && Utils.IsMobile)
             {
                 var gameControllerTransform = _gameController.transform;
                 var trackableTransform = mObserverBehaviour.transform;
@@ -68,6 +60,12 @@ namespace Tracking
             }
 
             OnTargetFound?.Invoke();
+        }
+
+        private void HidingPlayers()
+        {
+            // _photonViews = FindPhotonViews();
+            // SetActivePhotonViews(_photonViews, false);
         }
 
         private static PhotonView[] FindPhotonViews()
