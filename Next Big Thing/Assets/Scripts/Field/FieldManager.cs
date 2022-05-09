@@ -1,4 +1,3 @@
-using Card;
 using Player;
 using UnityEngine;
 
@@ -6,15 +5,13 @@ namespace Field
 {
     public class FieldManager : MonoBehaviour
     {
-        public CompanyCard CompanyCard { get; set; }
-        public FounderCard FounderCard { get; set; }
-        public PlayerControlManager PlayerManager { get; set; }
-
         [SerializeField] private GameObject currentCell;
-        private GameObject[] _cells;
 
-        // TODO
-        private bool _isFirst;
+        public PlayerData playerData;
+
+        private PlayerControlManager _playerManager;
+        private GameObject[] _cells;
+        private bool _isInstantiateCreated;
 
         private void Start()
         {
@@ -23,11 +20,11 @@ namespace Field
 
         private void Update()
         {
-            if (!_isFirst && !Utils.IsNull(PlayerManager))
-            {
-                UpdatePlayerPosition();
-                _isFirst = true;
-            }
+            if (_isInstantiateCreated || Utils.IsNull(playerData)) return;
+
+            _playerManager = playerData.Player.GetComponent<PlayerControlManager>();
+            _isInstantiateCreated = true;
+            UpdatePlayerPosition();
         }
 
         public void MakeMove()
@@ -40,10 +37,15 @@ namespace Field
             UpdatePlayerPosition();
         }
 
+        public CellManager GetCurrentCellManager()
+        {
+            return currentCell.GetComponent<CellManager>();
+        }
+
         private void UpdatePlayerPosition()
         {
             var position = currentCell.transform.position + PlayerUtils.InitPlayerPosition;
-            PlayerManager.SetPlayerPosition(position);
+            _playerManager.SetPlayerPosition(position);
         }
     }
 }

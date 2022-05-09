@@ -17,7 +17,7 @@ public class MultiplayerGameManager : MonoBehaviour
     [SerializeField] private PlayerUtils playerUtils;
 
     private GameStorage _storage;
-    private GameObject _instantiate;
+    private bool _isInitialized;
 
     private void Start()
     {
@@ -26,30 +26,40 @@ public class MultiplayerGameManager : MonoBehaviour
         companyCardRecognizer.AddListenerToCard(SetCompanyCard);
         founderCardRecognizer.AddListenerToCard(SetFounderCard);
         impactPointRecognizer.AddListenerToCard(SetImpactPoint);
-        _instantiate = playerUtils.InitializationPlayer();
+    }
 
-        if (!Utils.IsNull(_instantiate))
-        {
-            fieldManager.PlayerManager = _instantiate.GetComponent<PlayerControlManager>();
-        }
+    private void Update()
+    {
+        if (_isInitialized || !companyCardRecognizer.isFound || !founderCardRecognizer.isFound) return;
+
+        var player = playerUtils.InitializationPlayer();
+        fieldManager.playerData = new PlayerData(player, companyCardRecognizer.Card, founderCardRecognizer.Card);
+        _isInitialized = true;
     }
 
     public void MakeMove()
     {
         fieldManager.MakeMove();
+        var cellManager = fieldManager.GetCurrentCellManager();
+
+        uiManager.Log(cellManager.name + " " + cellManager.money + " " + cellManager.cellType);
     }
 
     private void SetCompanyCard(CompanyCardType type)
     {
-        if (fieldManager.CompanyCard != null) return;
-        fieldManager.CompanyCard = _storage.GetCompanyCardByType(type);
+        if (companyCardRecognizer.isFound) return;
+        companyCardRecognizer.Card = _storage.GetCompanyCardByType(type);
+        companyCardRecognizer.isFound = true;
+
         uiManager.Log("Card defined " + type);
     }
 
     private void SetFounderCard(FounderCardType type)
     {
-        if (fieldManager.FounderCard != null) return;
-        fieldManager.FounderCard = _storage.GetFounderCardByType(type);
+        if (founderCardRecognizer.isFound) return;
+        founderCardRecognizer.Card = _storage.GetFounderCardByType(type);
+        founderCardRecognizer.isFound = true;
+
         uiManager.Log("Card defined " + type);
     }
 

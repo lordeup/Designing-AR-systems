@@ -11,17 +11,16 @@ namespace Player
 
         public static readonly Vector3 InitPlayerPosition = new(0, 0.03f, 0);
 
-        private PlayerType _playerType;
-
-        private void Start()
-        {
-            _playerType = PlayerType.Player1;
-        }
-
         public GameObject InitializationPlayer()
         {
-            var player = GetPlayer(_playerType);
+            var playerType = GetPlayerType();
+            var player = GetPlayer(playerType);
             return PhotonNetwork.Instantiate(player.name, InitPlayerPosition, Quaternion.identity);
+        }
+
+        private static PlayerType GetPlayerType()
+        {
+            return PhotonNetwork.IsMasterClient ? PlayerType.Player1 : PlayerType.Player2;
         }
 
         private Transform GetPlayer(PlayerType playerType)

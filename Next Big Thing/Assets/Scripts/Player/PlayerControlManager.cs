@@ -7,7 +7,7 @@ namespace Player
     {
         private PhotonView _photonView;
 
-        private void Start()
+        private void Awake()
         {
             _photonView = GetComponent<PhotonView>();
         }

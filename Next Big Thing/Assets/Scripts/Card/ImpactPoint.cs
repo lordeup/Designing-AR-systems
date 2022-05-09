@@ -4,17 +4,15 @@ namespace Card
 {
     public class ImpactPoint
     {
+        public ImpactPointType Type;
+        public string Description;
+        public double Point;
+
         public ImpactPoint(ImpactPointType type, string description, double point)
         {
             Type = type;
             Description = description;
             Point = point;
         }
-
-        public ImpactPointType Type { get; set; }
-
-        public string Description { get; set; }
-
-        public double Point { get; set; }
     }
 }

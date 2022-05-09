@@ -4,9 +4,9 @@ namespace Field
 {
     public class CellManager : MonoBehaviour
     {
-        [SerializeField] private CellType cellType;
-        [SerializeField] private new string name;
-        [SerializeField] private double money;
+        public CellType cellType;
+        public new string name;
+        public double money;
 
         private void Start()
         {

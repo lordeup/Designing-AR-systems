@@ -5,6 +5,8 @@ namespace Tracking
 {
     public abstract class Recognizer<T> : MonoBehaviour
     {
+        [HideInInspector] public bool isFound;
+
         public void AddListenerToCard(Action<T> onFoundEvent)
         {
             var trackableEventHandlers = transform.GetComponentsInChildren<TrackableEventHandler<T>>();
