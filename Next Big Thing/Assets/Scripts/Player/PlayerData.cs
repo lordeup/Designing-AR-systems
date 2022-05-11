@@ -6,13 +6,11 @@ namespace Player
     public class PlayerData
     {
         public readonly GameObject Player;
-        public readonly CompanyCard CompanyCard;
         public readonly FounderCard FounderCard;
 
-        public PlayerData(GameObject player, CompanyCard companyCard, FounderCard founderCard)
+        public PlayerData(GameObject player, FounderCard founderCard)
         {
             Player = player;
-            CompanyCard = companyCard;
             FounderCard = founderCard;
         }
     }
