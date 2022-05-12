@@ -7,12 +7,14 @@ using Room;
 using Tracking.CompanyCard;
 using Tracking.FounderCard;
 using Tracking.ImpactPoint;
+using Tracking.NumberCard;
 
 public class MultiplayerGameManager : MonoBehaviour
 {
     [SerializeField] private CompanyCardRecognizer companyCardRecognizer;
     [SerializeField] private FounderCardRecognizer founderCardRecognizer;
     [SerializeField] private ImpactPointRecognizer impactPointRecognizer;
+    [SerializeField] private NumberCardRecognizer numberCardRecognizer;
 
     [SerializeField] private UIManager uiManager;
     [SerializeField] private FieldManager fieldManager;
@@ -28,6 +30,7 @@ public class MultiplayerGameManager : MonoBehaviour
         companyCardRecognizer.AddListenerToCard(SetCompanyCard);
         founderCardRecognizer.AddListenerToCard(SetFounderCard);
         impactPointRecognizer.AddListenerToCard(SetImpactPoint);
+        numberCardRecognizer.AddListenerToCard(SetNumberCard);
     }
 
     private void Update()
@@ -95,6 +98,11 @@ public class MultiplayerGameManager : MonoBehaviour
     {
         var card = _storage.GetImpactPointByType(type);
         uiManager.Log("Карта влияния: " + type);
+    }
+
+    private void SetNumberCard(NumberCardType type)
+    {
+        uiManager.Log("Карта числа: " + type);
     }
 
     private void MovementLog(CellManager cellManager)

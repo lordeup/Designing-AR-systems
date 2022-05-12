@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QCARConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="qcar_config.xsd">
+  <Tracking>
+    <ImageTarget name="NumberSix" size="0.100000 0.097604" />
+    <ImageTarget name="NumberFive" size="0.100000 0.163686" />
+    <ImageTarget name="NumberFour" size="0.100000 0.121277" />
+    <ImageTarget name="NumberThree" size="0.100000 0.194973" />
+    <ImageTarget name="NumberTwo" size="0.100000 0.146224" />
+    <ImageTarget name="NumberOne" size="0.100000 0.121875" />
+  </Tracking>
+</QCARConfig>
