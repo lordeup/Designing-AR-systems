@@ -65,6 +65,8 @@ namespace Tracking
         private void HidingPlayers()
         {
             // _photonViews = FindPhotonViews();
+            // if (_photonViews.Length == 0) return;
+
             // SetActivePhotonViews(_photonViews, false);
         }
 

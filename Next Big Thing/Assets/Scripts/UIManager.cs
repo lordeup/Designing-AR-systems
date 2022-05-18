@@ -36,13 +36,13 @@ public class UIManager : MonoBehaviour
     public void ShowYourTurn()
     {
         SetActiveYourTurnPanel(true);
-        StartCoroutine(CustomWaitUtils.WaitForSeconds(() => SetActiveYourTurnPanel(false), 2f));
+        StartCoroutine(CustomWaitUtils.WaitForSeconds(() => SetActiveYourTurnPanel(false), 3f));
     }
 
     public void ShowOtherTurnPanel()
     {
         SetActiveOtherTurnPanel(true);
-        StartCoroutine(CustomWaitUtils.WaitForSeconds(() => SetActiveOtherTurnPanel(false), 2f));
+        StartCoroutine(CustomWaitUtils.WaitForSeconds(() => SetActiveOtherTurnPanel(false), 3f));
     }
 
     public void SetActiveLogPanel(bool state)

@@ -28,7 +28,7 @@ namespace Field
             UpdatePlayerPosition();
         }
 
-        public void MakeMove(int newIndex)
+        public void ExecuteMove(int newIndex)
         {
             var currentIndex = System.Array.IndexOf(_cells, currentCell);
             if (currentIndex == _cells.Length - 1) return;

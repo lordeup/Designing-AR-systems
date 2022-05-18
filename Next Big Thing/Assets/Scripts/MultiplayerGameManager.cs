@@ -1,9 +1,12 @@
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using UnityEngine;
 using Card.Type;
 using Field;
 using Photon.Pun;
 using Player;
+using Room;
 using Tracking.FounderCard;
 using Tracking.ImpactPoint;
 using Tracking.NumberCard;
@@ -37,13 +40,12 @@ public class MultiplayerGameManager : MonoBehaviour
         if (!_isInitialized && !Utils.IsNull(founderCardRecognizer.Card))
         {
             InitField();
-            numberCardRecognizer.AddListenerToCard(SetNumberCard);
             _isInitialized = true;
         }
 
         if (numberCardRecognizer.GetCountCards() == 2)
         {
-            MakeMove();
+            ExecuteMove();
             numberCardRecognizer.ClearCards();
         }
     }
@@ -53,16 +55,16 @@ public class MultiplayerGameManager : MonoBehaviour
         var player = playerUtils.InitializationPlayer();
         fieldManager.Data = new PlayerData(player, founderCardRecognizer.Card);
         founderCardRecognizer.RemoveAllListeners();
-        _currentPlayer = playerUtils.GetPlayerByType(PlayerType.Player1);
+        _currentPlayer = playerUtils.GetMasterPlayer();
 
         ShowTurnPlayer();
         SetActiveUI(true);
     }
 
-    private void MakeMove()
+    private void ExecuteMove()
     {
         var amount = numberCardRecognizer.GetAmountCards();
-        fieldManager.MakeMove(amount);
+        fieldManager.ExecuteMove(amount);
 
         var cellManager = fieldManager.GetCurrentCellManager();
         Log(cellManager);
@@ -78,8 +80,7 @@ public class MultiplayerGameManager : MonoBehaviour
         if (cellType == CellType.Finish)
         {
             SetActiveUI(false);
-            // TODO add check win
-            uiManager.ShowWinningPanel();
+            CheckForWin();
         }
         else if (cellType == CellType.Profit)
         {
@@ -92,6 +93,7 @@ public class MultiplayerGameManager : MonoBehaviour
         else if (cellType == CellType.Impact)
         {
             impactPointRecognizer.AddListenerToCard(SetImpactPoint);
+            uiManager.Log("Отсканируйте камерой карточку влияния.");
 
             StartCoroutine(CustomWaitUtils.WaitWhile(
                 () => Utils.IsNull(impactPointRecognizer.Card),
@@ -112,7 +114,7 @@ public class MultiplayerGameManager : MonoBehaviour
 
         var player = playerType switch
         {
-            // PlayerType.Player1 => playerUtils.GetPlayerByType(PlayerType.Player2),
+            PlayerType.Player1 => playerUtils.GetPlayerByType(PlayerType.Player2),
             PlayerType.Player2 => playerUtils.GetPlayerByType(PlayerType.Player1),
             _ => _currentPlayer
         };
@@ -131,15 +133,6 @@ public class MultiplayerGameManager : MonoBehaviour
         _currentPlayer = playerUtils.GetPlayerById(userId);
         ShowTurnPlayer();
     }
-
-    // private void SyncParameters()
-    // {
-    // }
-    //
-    // [PunRPC]
-    // private void SetPlayerParametersRpc()
-    // {
-    // }
 
     private void SetFounderCard(FounderCardType type)
     {
@@ -180,34 +173,72 @@ public class MultiplayerGameManager : MonoBehaviour
         {
             uiManager.Log(cellName + " +" + cellMoney);
         }
-        else if (cellType == CellType.Impact)
-        {
-        }
         else
         {
             uiManager.Log("");
         }
     }
 
+    private void CheckForWin()
+    {
+        var property = playerUtils.GetPlayerMoneyCustomProperties();
+        var maxValueKey = property.OrderByDescending(item => item.Value).First().Key;
+        Debug.LogWarning("maxValueKey " + maxValueKey);
+        ShowPlayerWin(maxValueKey);
+    }
+
+    private void ShowPlayerWin(string userId)
+    {
+        if (IsMine(userId))
+        {
+            uiManager.ShowWinningPanel();
+        }
+        else
+        {
+            uiManager.ShowLosingPanel();
+        }
+    }
+
     private void ShowTurnPlayer()
     {
-        if (IsMyTurn())
+        if (IsMine(_currentPlayer.UserId))
+        {
+            numberCardRecognizer.AddListenerToCard(SetNumberCard);
             uiManager.ShowYourTurn();
+        }
         else
+        {
+            numberCardRecognizer.RemoveAllListeners();
             uiManager.ShowOtherTurnPanel();
+        }
 
         SetMoneyValue();
     }
 
     private void SetMoneyValue()
     {
+        var userId = playerUtils.GetLocalPlayer().UserId;
         var money = fieldManager.Data.FounderCard.Money;
+
+        var property = playerUtils.GetPlayerMoneyCustomProperties();
+        var dictionaryMoney = new Dictionary<string, double>(property);
+
+        if (dictionaryMoney.ContainsKey(userId))
+        {
+            dictionaryMoney[userId] = money;
+        }
+        else
+        {
+            dictionaryMoney.Add(userId, money);
+        }
+
+        CustomPropertyUtils.UpdateCustomPropertyByKey(CustomPropertyKeys.PlayerMoney, dictionaryMoney);
         uiManager.SetMoneyValue(money.ToString(CultureInfo.InvariantCulture));
     }
 
-    private bool IsMyTurn()
+    private bool IsMine(string userId)
     {
-        return playerUtils.GetLocalPlayer().Equals(_currentPlayer);
+        return playerUtils.GetLocalPlayer().UserId.Equals(userId);
     }
 
     private void SetActiveUI(bool state)

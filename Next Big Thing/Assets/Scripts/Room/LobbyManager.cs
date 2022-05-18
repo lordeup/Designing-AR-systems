@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using ExitGames.Client.Photon;
 using Photon.Pun;
 using Photon.Realtime;
@@ -10,12 +11,19 @@ namespace Room
     {
         private const string GameSceneName = "Game";
         private const string RoomName = "Room 1";
+        private PlayerType _playerType;
+
+        private void Start()
+        {
+            _playerType = PlayerSelectionManager.GetPlayerType();
+        }
 
         public void JoinOrCreateRoom()
         {
             PhotonNetwork.SetPlayerCustomProperties(GetPlayerCustomProperties());
             var roomOptions = new RoomOptions
             {
+                CustomRoomProperties = GetCustomProperties(),
                 MaxPlayers = 2,
                 PublishUserId = true
             };
@@ -30,20 +38,24 @@ namespace Room
             PhotonNetwork.LoadLevel(GameSceneName);
         }
 
-        private static Hashtable GetPlayerCustomProperties()
+        private Hashtable GetPlayerCustomProperties()
         {
-            var playerType = GetPlayerType();
-
             var properties = new Hashtable
             {
-                { CustomPropertyKeys.PlayerType.ToString(), playerType },
+                { CustomPropertyKeys.PlayerType.ToString(), _playerType },
             };
             return properties;
         }
 
-        private static PlayerType GetPlayerType()
+        private static Hashtable GetCustomProperties()
         {
-            return PhotonNetwork.PlayerList.Length == 0 ? PlayerType.Player1 : PlayerType.Player2;
+            var dictionaryMoney = new Dictionary<string, double>();
+
+            var properties = new Hashtable
+            {
+                { CustomPropertyKeys.PlayerMoney.ToString(), dictionaryMoney },
+            };
+            return properties;
         }
     }
 }

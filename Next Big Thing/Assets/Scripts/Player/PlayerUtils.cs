@@ -22,6 +22,12 @@ namespace Player
             return PhotonNetwork.Instantiate(player.name, InitPlayerPosition, Quaternion.identity);
         }
 
+        public PhotonPlayer GetMasterPlayer()
+        {
+            var players = GetPlayers();
+            return players.First(player => player.IsMasterClient);
+        }
+
         public PhotonPlayer GetPlayerById(string id)
         {
             var players = GetPlayers();
@@ -34,14 +40,20 @@ namespace Player
             return players.First(player => GetPlayerType(player) == type);
         }
 
+        public Dictionary<string, double> GetPlayerMoneyCustomProperties()
+        {
+            return (Dictionary<string, double>)CustomPropertyUtils.GetCustomPropertyByKey(
+                CustomPropertyKeys.PlayerMoney);
+        }
+
         public PhotonPlayer GetLocalPlayer()
         {
             return PhotonNetwork.LocalPlayer;
         }
-        
+
         public PlayerType GetPlayerType(PhotonPlayer player)
         {
-            return (PlayerType)player.CustomProperties[CustomPropertyKeys.PlayerType.ToString()];
+            return (PlayerType)CustomPropertyUtils.GetPlayerCustomPropertyByKey(CustomPropertyKeys.PlayerType, player);
         }
 
         private static IEnumerable<PhotonPlayer> GetPlayers()
