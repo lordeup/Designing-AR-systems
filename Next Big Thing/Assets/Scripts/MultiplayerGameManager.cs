@@ -2,16 +2,15 @@ using System.Globalization;
 using UnityEngine;
 using Card.Type;
 using Field;
+using Photon.Pun;
 using Player;
-using Room;
-using Tracking.CompanyCard;
 using Tracking.FounderCard;
 using Tracking.ImpactPoint;
 using Tracking.NumberCard;
+using PhotonPlayer = Photon.Realtime.Player;
 
 public class MultiplayerGameManager : MonoBehaviour
 {
-    [SerializeField] private CompanyCardRecognizer companyCardRecognizer;
     [SerializeField] private FounderCardRecognizer founderCardRecognizer;
     [SerializeField] private ImpactPointRecognizer impactPointRecognizer;
     [SerializeField] private NumberCardRecognizer numberCardRecognizer;
@@ -22,33 +21,51 @@ public class MultiplayerGameManager : MonoBehaviour
 
     private GameStorage _storage;
     private bool _isInitialized;
+    private PhotonPlayer _currentPlayer;
+    private PhotonView _photonView;
 
     private void Start()
     {
         _storage = gameObject.AddComponent<GameStorage>();
+        _photonView = GetComponent<PhotonView>();
 
-        companyCardRecognizer.AddListenerToCard(SetCompanyCard);
         founderCardRecognizer.AddListenerToCard(SetFounderCard);
-        impactPointRecognizer.AddListenerToCard(SetImpactPoint);
-        numberCardRecognizer.AddListenerToCard(SetNumberCard);
     }
 
     private void Update()
     {
-        if (_isInitialized || !founderCardRecognizer.isFound) return;
+        if (!_isInitialized && !Utils.IsNull(founderCardRecognizer.Card))
+        {
+            InitField();
+            numberCardRecognizer.AddListenerToCard(SetNumberCard);
+            _isInitialized = true;
+        }
 
-        var player = playerUtils.InitializationPlayer();
-        fieldManager.Data = new PlayerData(player, founderCardRecognizer.Card);
-        SetActiveUI(true);
-        SetMoneyValue();
-        _isInitialized = true;
+        if (numberCardRecognizer.GetCountCards() == 2)
+        {
+            MakeMove();
+            numberCardRecognizer.ClearCards();
+        }
     }
 
-    public void MakeMove()
+    private void InitField()
     {
-        fieldManager.MakeMove();
+        var player = playerUtils.InitializationPlayer();
+        fieldManager.Data = new PlayerData(player, founderCardRecognizer.Card);
+        founderCardRecognizer.RemoveAllListeners();
+        _currentPlayer = playerUtils.GetPlayerByType(PlayerType.Player1);
+
+        ShowTurnPlayer();
+        SetActiveUI(true);
+    }
+
+    private void MakeMove()
+    {
+        var amount = numberCardRecognizer.GetAmountCards();
+        fieldManager.MakeMove(amount);
+
         var cellManager = fieldManager.GetCurrentCellManager();
-        MovementLog(cellManager);
+        Log(cellManager);
         HandleCommand(cellManager);
         SetMoneyValue();
     }
@@ -61,51 +78,95 @@ public class MultiplayerGameManager : MonoBehaviour
         if (cellType == CellType.Finish)
         {
             SetActiveUI(false);
-            StartCoroutine(SceneController.WaitMethod(SetActiveWinningPanel, 1f));
+            // TODO add check win
+            uiManager.ShowWinningPanel();
         }
         else if (cellType == CellType.Profit)
         {
-            fieldManager.ProfitCellCommand(money);
+            ExecutePassTurn(() => fieldManager.ProfitCellCommand(money));
         }
         else if (cellType == CellType.Cost)
         {
-            fieldManager.CostCellCommand(money);
+            ExecutePassTurn(() => fieldManager.CostCellCommand(money));
         }
         else if (cellType == CellType.Impact)
         {
+            impactPointRecognizer.AddListenerToCard(SetImpactPoint);
+
+            StartCoroutine(CustomWaitUtils.WaitWhile(
+                () => Utils.IsNull(impactPointRecognizer.Card),
+                () => ExecutePassTurn(ActionAfterFindingImpactCard))
+            );
         }
     }
 
-    private void SetCompanyCard(CompanyCardType type)
+    private void ExecutePassTurn(CustomWaitUtils.DelegateWaitMethod method)
     {
-        if (companyCardRecognizer.isFound) return;
-        companyCardRecognizer.Card = _storage.GetCompanyCardByType(type);
-        companyCardRecognizer.isFound = true;
-
-        uiManager.Log("Карта компании: " + type);
+        method?.Invoke();
+        PassTurn();
     }
+
+    private void PassTurn()
+    {
+        var playerType = playerUtils.GetPlayerType(_currentPlayer);
+
+        var player = playerType switch
+        {
+            // PlayerType.Player1 => playerUtils.GetPlayerByType(PlayerType.Player2),
+            PlayerType.Player2 => playerUtils.GetPlayerByType(PlayerType.Player1),
+            _ => _currentPlayer
+        };
+
+        SetCurrentPlayer(player.UserId);
+    }
+
+    private void SetCurrentPlayer(string userId)
+    {
+        _photonView.RPC("SetCurrentPlayerRpc", RpcTarget.All, userId);
+    }
+
+    [PunRPC]
+    private void SetCurrentPlayerRpc(string userId)
+    {
+        _currentPlayer = playerUtils.GetPlayerById(userId);
+        ShowTurnPlayer();
+    }
+
+    // private void SyncParameters()
+    // {
+    // }
+    //
+    // [PunRPC]
+    // private void SetPlayerParametersRpc()
+    // {
+    // }
 
     private void SetFounderCard(FounderCardType type)
     {
-        if (founderCardRecognizer.isFound) return;
         founderCardRecognizer.Card = _storage.GetFounderCardByType(type);
-        founderCardRecognizer.isFound = true;
-
         uiManager.Log("Карта основателя: " + type);
     }
 
     private void SetImpactPoint(ImpactPointType type)
     {
-        var card = _storage.GetImpactPointByType(type);
+        impactPointRecognizer.Card = _storage.GetImpactPointByType(type);
         uiManager.Log("Карта влияния: " + type);
     }
 
     private void SetNumberCard(NumberCardType type)
     {
+        numberCardRecognizer.AddCard(type);
         uiManager.Log("Карта числа: " + type);
     }
 
-    private void MovementLog(CellManager cellManager)
+    private void ActionAfterFindingImpactCard()
+    {
+        fieldManager.ImpactCellCommand(impactPointRecognizer.Card);
+        impactPointRecognizer.Card = null;
+        impactPointRecognizer.RemoveAllListeners();
+    }
+
+    private void Log(CellManager cellManager)
     {
         var cellName = cellManager.name;
         var cellMoney = cellManager.money;
@@ -119,10 +180,23 @@ public class MultiplayerGameManager : MonoBehaviour
         {
             uiManager.Log(cellName + " +" + cellMoney);
         }
+        else if (cellType == CellType.Impact)
+        {
+        }
         else
         {
             uiManager.Log("");
         }
+    }
+
+    private void ShowTurnPlayer()
+    {
+        if (IsMyTurn())
+            uiManager.ShowYourTurn();
+        else
+            uiManager.ShowOtherTurnPanel();
+
+        SetMoneyValue();
     }
 
     private void SetMoneyValue()
@@ -131,15 +205,14 @@ public class MultiplayerGameManager : MonoBehaviour
         uiManager.SetMoneyValue(money.ToString(CultureInfo.InvariantCulture));
     }
 
-    private void SetActiveWinningPanel()
+    private bool IsMyTurn()
     {
-        uiManager.SetActiveWinningPanel(true);
+        return playerUtils.GetLocalPlayer().Equals(_currentPlayer);
     }
 
     private void SetActiveUI(bool state)
     {
         uiManager.SetActiveMoneyPanel(state);
         uiManager.SetActiveLogPanel(state);
-        uiManager.SetActiveMakeMoveButton(state);
     }
 }

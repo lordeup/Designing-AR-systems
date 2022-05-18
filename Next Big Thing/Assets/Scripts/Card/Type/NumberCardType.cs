@@ -2,7 +2,7 @@ namespace Card.Type
 {
     public enum NumberCardType
     {
-        NumberOne,
+        NumberOne = 1,
         NumberTwo,
         NumberThree,
         NumberFour,

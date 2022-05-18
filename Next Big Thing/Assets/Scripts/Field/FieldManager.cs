@@ -1,3 +1,4 @@
+using Card;
 using Player;
 using UnityEngine;
 
@@ -12,12 +13,10 @@ namespace Field
         private PlayerControlManager _playerManager;
         private GameObject[] _cells;
         private bool _isInstantiateCreated;
-        private System.Random _random;
 
         private void Start()
         {
             _cells = GameObject.FindGameObjectsWithTag(GameObjectTag.Cell.ToString());
-            _random = new System.Random();
         }
 
         private void Update()
@@ -29,12 +28,11 @@ namespace Field
             UpdatePlayerPosition();
         }
 
-        public void MakeMove()
+        public void MakeMove(int newIndex)
         {
             var currentIndex = System.Array.IndexOf(_cells, currentCell);
             if (currentIndex == _cells.Length - 1) return;
 
-            var newIndex = GetNewCellIndex(currentIndex);
             currentCell = _cells[newIndex];
             UpdatePlayerPosition();
         }
@@ -50,22 +48,6 @@ namespace Field
             _playerManager.SetPlayerPosition(position);
         }
 
-        private int GetNewCellIndex(int currentIndex)
-        {
-            int newIndex;
-            while (true)
-            {
-                var next = _random.Next(1, 7);
-                newIndex = currentIndex + next;
-                if (newIndex < _cells.Length)
-                {
-                    break;
-                }
-            }
-
-            return newIndex;
-        }
-
         public void ProfitCellCommand(double money)
         {
             Data.FounderCard.Money += money;
@@ -74,6 +56,11 @@ namespace Field
         public void CostCellCommand(double money)
         {
             Data.FounderCard.Money -= money;
+        }
+
+        public void ImpactCellCommand(ImpactPoint card)
+        {
+            Data.FounderCard.Money += card.Point;
         }
     }
 }

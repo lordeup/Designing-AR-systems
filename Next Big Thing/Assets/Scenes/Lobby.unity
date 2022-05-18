@@ -308,7 +308,7 @@ PrefabInstance:
     - target: {fileID: 4682123927878492597, guid: 387631bf24aa9e94b85fbcd2b72bf004,
         type: 3}
       propertyPath: m_text
-      value: Create Room
+      value: Join or Create Room
       objectReference: {fileID: 0}
     - target: {fileID: 4682123927878492597, guid: 387631bf24aa9e94b85fbcd2b72bf004,
         type: 3}
@@ -414,7 +414,7 @@ PrefabInstance:
     - target: {fileID: 4682123928727057205, guid: 387631bf24aa9e94b85fbcd2b72bf004,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 120
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4682123928727057205, guid: 387631bf24aa9e94b85fbcd2b72bf004,
         type: 3}
@@ -454,12 +454,12 @@ PrefabInstance:
     - target: {fileID: 4682123928727057206, guid: 387631bf24aa9e94b85fbcd2b72bf004,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: CreateRoom
+      value: JoinOrCreateRoom
       objectReference: {fileID: 0}
     - target: {fileID: 4682123928727057206, guid: 387631bf24aa9e94b85fbcd2b72bf004,
         type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: LobbyManager, Assembly-CSharp
+      value: Room.LobbyManager, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 4682123928727057206, guid: 387631bf24aa9e94b85fbcd2b72bf004,
         type: 3}
@@ -893,6 +893,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: JoinRoomButton
+      objectReference: {fileID: 0}
+    - target: {fileID: 4682123928727057204, guid: 387631bf24aa9e94b85fbcd2b72bf004,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4682123928727057205, guid: 387631bf24aa9e94b85fbcd2b72bf004,
         type: 3}
