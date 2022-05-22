@@ -15,7 +15,7 @@ namespace Player
         public void SetPlayerPosition(Vector3 newPosition)
         {
             if (!_photonView.IsMine) return;
-            _photonView.transform.position = newPosition;
+            transform.position = newPosition;
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Player
         [SerializeField] private Transform prefabPlayer1;
         [SerializeField] private Transform prefabPlayer2;
 
-        public static readonly Vector3 InitPlayerPosition = new(0, 0.03f, 0);
+        public static readonly Vector3 InitPlayerPosition = new(0f, 0.03f, 0f);
 
         public GameObject InitializationPlayer()
         {

@@ -183,7 +183,6 @@ public class MultiplayerGameManager : MonoBehaviour
     {
         var property = playerUtils.GetPlayerMoneyCustomProperties();
         var maxValueKey = property.OrderByDescending(item => item.Value).First().Key;
-        Debug.LogWarning("maxValueKey " + maxValueKey);
         ShowPlayerWin(maxValueKey);
     }
 
