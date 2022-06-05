@@ -46,6 +46,12 @@ namespace Player
                 CustomPropertyKeys.PlayerMoney);
         }
 
+        public Dictionary<string, int> GetPlayerScoreCustomProperties()
+        {
+            return (Dictionary<string, int>)CustomPropertyUtils.GetCustomPropertyByKey(
+                CustomPropertyKeys.PlayerScore);
+        }
+
         public PhotonPlayer GetLocalPlayer()
         {
             return PhotonNetwork.LocalPlayer;
@@ -56,7 +62,7 @@ namespace Player
             return (PlayerType)CustomPropertyUtils.GetPlayerCustomPropertyByKey(CustomPropertyKeys.PlayerType, player);
         }
 
-        private static IEnumerable<PhotonPlayer> GetPlayers()
+        public IEnumerable<PhotonPlayer> GetPlayers()
         {
             return PhotonNetwork.PlayerList;
         }

@@ -1,26 +1,29 @@
+using System.Globalization;
 using UnityEngine;
-using TMPro;
 
 public class UIManager : MonoBehaviour
 {
     [SerializeField] private RectTransform winningPanel;
     [SerializeField] private RectTransform losingPanel;
+
     [SerializeField] private RectTransform yourTurnPanel;
     [SerializeField] private RectTransform otherTurnPanel;
+
     [SerializeField] private RectTransform logPanel;
-    [SerializeField] private RectTransform moneyPanel;
+    [SerializeField] private RectTransform actionPanel;
+    [SerializeField] private RectTransform choicePanel;
 
-    [SerializeField] private TextMeshProUGUI logText;
-    [SerializeField] private TextMeshProUGUI moneyValueText;
+    [SerializeField] private RectTransform myScoreMoneyPanel;
+    [SerializeField] private RectTransform otherScoreMoneyPanel;
 
-    public void Log(string message)
+    public void Log(string text)
     {
-        logText.text = message;
+        // Utils.SetPanelTextValue(logPanel, text);
     }
 
-    public void SetMoneyValue(string message)
+    public void SetActionValue(string text)
     {
-        moneyValueText.text = message;
+        // Utils.SetPanelTextValue(actionPanel, text);
     }
 
     public void ShowWinningPanel()
@@ -45,14 +48,30 @@ public class UIManager : MonoBehaviour
         StartCoroutine(CustomWaitUtils.WaitForSeconds(() => SetActiveOtherTurnPanel(false), 3f));
     }
 
-    public void SetActiveLogPanel(bool state)
+    public void ShowActionPanel()
     {
-        Utils.SetActivePanel(logPanel, state);
+        SetActiveActionPanel(true);
+        StartCoroutine(CustomWaitUtils.WaitForSeconds(() => SetActiveActionPanel(false), 3f));
     }
 
-    public void SetActiveMoneyPanel(bool state)
+    public void SetMyScoreValue(int score)
     {
-        Utils.SetActivePanel(moneyPanel, state);
+        SetScoreValue(myScoreMoneyPanel, score);
+    }
+
+    public void SetMyMoneyValue(double money)
+    {
+        SetMoneyValue(myScoreMoneyPanel, money);
+    }
+
+    public void SetOtherScoreValue(int score)
+    {
+        SetScoreValue(otherScoreMoneyPanel, score);
+    }
+
+    public void SetOtherMoneyValue(double money)
+    {
+        SetMoneyValue(otherScoreMoneyPanel, money);
     }
 
     private void SetActiveYourTurnPanel(bool state)
@@ -63,5 +82,40 @@ public class UIManager : MonoBehaviour
     private void SetActiveOtherTurnPanel(bool state)
     {
         Utils.SetActivePanel(otherTurnPanel, state);
+    }
+
+    public void SetActiveLogPanel(bool state)
+    {
+        Utils.SetActivePanel(logPanel, state);
+    }
+
+    public void SetActiveChoicePanel(bool state)
+    {
+        Utils.SetActivePanel(choicePanel, state);
+    }
+
+    public void SetActiveMyScoreMoneyPanel(bool state)
+    {
+        Utils.SetActivePanel(myScoreMoneyPanel, state);
+    }
+
+    public void SetActiveOtherScoreMoneyPanel(bool state)
+    {
+        Utils.SetActivePanel(otherScoreMoneyPanel, state);
+    }
+
+    private void SetActiveActionPanel(bool state)
+    {
+        Utils.SetActivePanel(actionPanel, state);
+    }
+
+    private static void SetScoreValue(Component panel, int score)
+    {
+        Utils.SetPanelTextValue(panel, GameObjectTag.Score, score.ToString());
+    }
+
+    private static void SetMoneyValue(Component panel, double money)
+    {
+        Utils.SetPanelTextValue(panel, GameObjectTag.Money, money.ToString(CultureInfo.InvariantCulture));
     }
 }

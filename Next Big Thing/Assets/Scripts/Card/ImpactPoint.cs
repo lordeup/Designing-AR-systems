@@ -6,13 +6,13 @@ namespace Card
     {
         public ImpactPointType Type;
         public string Description;
-        public double Point;
+        public int Score;
 
-        public ImpactPoint(ImpactPointType type, string description, double point)
+        public ImpactPoint(ImpactPointType type, string description, int score)
         {
             Type = type;
             Description = description;
-            Point = point;
+            Score = score;
         }
     }
 }

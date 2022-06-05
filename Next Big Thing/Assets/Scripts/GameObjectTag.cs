@@ -1,5 +1,7 @@
 public enum GameObjectTag
 {
     Field,
-    Cell
+    Cell,
+    Score,
+    Money
 }

@@ -50,17 +50,17 @@ namespace Field
 
         public void ProfitCellCommand(double money)
         {
-            Data.FounderCard.Money += money;
+            Data.CompanyCard.Money += money;
         }
 
         public void CostCellCommand(double money)
         {
-            Data.FounderCard.Money -= money;
+            Data.CompanyCard.Money -= money;
         }
 
         public void ImpactCellCommand(ImpactPoint card)
         {
-            Data.FounderCard.Money += card.Point;
+            Data.CompanyCard.Score += card.Score;
         }
     }
 }

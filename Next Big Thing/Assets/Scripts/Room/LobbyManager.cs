@@ -50,10 +50,12 @@ namespace Room
         private static Hashtable GetCustomProperties()
         {
             var dictionaryMoney = new Dictionary<string, double>();
+            var dictionaryScore = new Dictionary<string, int>();
 
             var properties = new Hashtable
             {
                 { CustomPropertyKeys.PlayerMoney.ToString(), dictionaryMoney },
+                { CustomPropertyKeys.PlayerScore.ToString(), dictionaryScore },
             };
             return properties;
         }

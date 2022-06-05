@@ -6,6 +6,8 @@ TagManager:
   tags:
   - Field
   - Cell
+  - Score
+  - Money
   layers:
   - Default
   - TransparentFX

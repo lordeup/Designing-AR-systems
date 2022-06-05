@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using UnityEngine;
 using Card.Type;
@@ -7,14 +5,14 @@ using Field;
 using Photon.Pun;
 using Player;
 using Room;
-using Tracking.FounderCard;
+using Tracking.CompanyCard;
 using Tracking.ImpactPoint;
 using Tracking.NumberCard;
 using PhotonPlayer = Photon.Realtime.Player;
 
 public class MultiplayerGameManager : MonoBehaviour
 {
-    [SerializeField] private FounderCardRecognizer founderCardRecognizer;
+    [SerializeField] private CompanyCardRecognizer companyCardRecognizer;
     [SerializeField] private ImpactPointRecognizer impactPointRecognizer;
     [SerializeField] private NumberCardRecognizer numberCardRecognizer;
 
@@ -32,12 +30,12 @@ public class MultiplayerGameManager : MonoBehaviour
         _storage = gameObject.AddComponent<GameStorage>();
         _photonView = GetComponent<PhotonView>();
 
-        founderCardRecognizer.AddListenerToCard(SetFounderCard);
+        companyCardRecognizer.AddListenerToCard(SetCompanyCard);
     }
 
     private void Update()
     {
-        if (!_isInitialized && !Utils.IsNull(founderCardRecognizer.Card))
+        if (!_isInitialized && !Utils.IsNull(companyCardRecognizer.Card))
         {
             InitField();
             _isInitialized = true;
@@ -53,8 +51,8 @@ public class MultiplayerGameManager : MonoBehaviour
     private void InitField()
     {
         var player = playerUtils.InitializationPlayer();
-        fieldManager.Data = new PlayerData(player, founderCardRecognizer.Card);
-        founderCardRecognizer.RemoveAllListeners();
+        fieldManager.Data = new PlayerData(player, companyCardRecognizer.Card);
+        companyCardRecognizer.RemoveAllListeners();
         _currentPlayer = playerUtils.GetMasterPlayer();
 
         ShowTurnPlayer();
@@ -134,10 +132,10 @@ public class MultiplayerGameManager : MonoBehaviour
         ShowTurnPlayer();
     }
 
-    private void SetFounderCard(FounderCardType type)
+    private void SetCompanyCard(CompanyCardType type)
     {
-        founderCardRecognizer.Card = _storage.GetFounderCardByType(type);
-        uiManager.Log("Карта основателя: " + type);
+        companyCardRecognizer.Card = _storage.GetCompanyCardByType(type);
+        uiManager.Log("Карта компании: " + type);
     }
 
     private void SetImpactPoint(ImpactPointType type)
@@ -165,24 +163,22 @@ public class MultiplayerGameManager : MonoBehaviour
         var cellMoney = cellManager.money;
         var cellType = cellManager.cellType;
 
-        if (cellType == CellType.Cost)
+        var text = cellType switch
         {
-            uiManager.Log(cellName + " -" + cellMoney);
-        }
-        else if (cellType == CellType.Profit)
-        {
-            uiManager.Log(cellName + " +" + cellMoney);
-        }
-        else
-        {
-            uiManager.Log("");
-        }
+            CellType.Cost => cellName + " -" + cellMoney,
+            CellType.Profit => cellName + " +" + cellMoney,
+            _ => ""
+        };
+
+        if (!string.IsNullOrEmpty(text)) return;
+        uiManager.SetActionValue(text);
+        uiManager.ShowActionPanel();
     }
 
     private void CheckForWin()
     {
-        var property = playerUtils.GetPlayerMoneyCustomProperties();
-        var maxValueKey = property.OrderByDescending(item => item.Value).First().Key;
+        var properties = playerUtils.GetPlayerMoneyCustomProperties();
+        var maxValueKey = properties.OrderByDescending(item => item.Value).First().Key;
         ShowPlayerWin(maxValueKey);
     }
 
@@ -214,35 +210,80 @@ public class MultiplayerGameManager : MonoBehaviour
         SetMoneyValue();
     }
 
+    private void SetScoreValue()
+    {
+        var userId = GetLocalUserId();
+        var score = fieldManager.Data.CompanyCard.Score;
+
+        var properties = playerUtils.GetPlayerScoreCustomProperties();
+        var dictionary = Utils.SetDictionaryValue(properties, userId, score);
+
+        CustomPropertyUtils.UpdateCustomPropertyByKey(CustomPropertyKeys.PlayerScore, dictionary);
+        UpdateScoreMoneyPanel();
+    }
+
     private void SetMoneyValue()
     {
-        var userId = playerUtils.GetLocalPlayer().UserId;
-        var money = fieldManager.Data.FounderCard.Money;
+        var userId = GetLocalUserId();
+        var money = fieldManager.Data.CompanyCard.Money;
 
-        var property = playerUtils.GetPlayerMoneyCustomProperties();
-        var dictionaryMoney = new Dictionary<string, double>(property);
+        var properties = playerUtils.GetPlayerMoneyCustomProperties();
+        var dictionary = Utils.SetDictionaryValue(properties, userId, money);
 
-        if (dictionaryMoney.ContainsKey(userId))
+        CustomPropertyUtils.UpdateCustomPropertyByKey(CustomPropertyKeys.PlayerMoney, dictionary);
+        UpdateScoreMoneyPanel();
+    }
+
+    private void UpdateScoreMoneyPanel()
+    {
+        var players = playerUtils.GetPlayers();
+        var scoreProperties = playerUtils.GetPlayerScoreCustomProperties();
+        var moneyProperties = playerUtils.GetPlayerMoneyCustomProperties();
+
+        foreach (var player in players)
         {
-            dictionaryMoney[userId] = money;
-        }
-        else
-        {
-            dictionaryMoney.Add(userId, money);
-        }
+            var userId = player.UserId;
+            if (scoreProperties.TryGetValue(userId, out var score))
+            {
+                if (IsMine(userId))
+                {
+                    uiManager.SetMyScoreValue(score);
+                }
+                else
+                {
+                    uiManager.SetOtherScoreValue(score);
+                }
+            }
 
-        CustomPropertyUtils.UpdateCustomPropertyByKey(CustomPropertyKeys.PlayerMoney, dictionaryMoney);
-        uiManager.SetMoneyValue(money.ToString(CultureInfo.InvariantCulture));
+            if (moneyProperties.TryGetValue(userId, out var money))
+            {
+                if (IsMine(userId))
+                {
+                    uiManager.SetMyMoneyValue(money);
+                }
+                else
+                {
+                    uiManager.SetOtherMoneyValue(money);
+                }
+            }
+        }
     }
 
     private bool IsMine(string userId)
     {
-        return playerUtils.GetLocalPlayer().UserId.Equals(userId);
+        return GetLocalUserId().Equals(userId);
     }
 
+    private string GetLocalUserId()
+    {
+        return playerUtils.GetLocalPlayer().UserId;
+    }
+
+    // TODO move?
     private void SetActiveUI(bool state)
     {
-        uiManager.SetActiveMoneyPanel(state);
+        uiManager.SetActiveMyScoreMoneyPanel(state);
+        uiManager.SetActiveOtherScoreMoneyPanel(state);
         uiManager.SetActiveLogPanel(state);
     }
 }
