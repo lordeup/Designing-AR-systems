@@ -2,9 +2,15 @@ namespace Card.Type
 {
     public enum ImpactPointType
     {
-        Social,
-        EthicsDiversity,
-        Sustainability,
-        HealthWellness
+        First,
+        Second,
+        Third,
+        Fourth,
+        Fifth,
+        Sixth,
+        Seventh,
+        Eighth,
+        Ninth,
+        Tenth
     }
 }

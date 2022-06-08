@@ -1,18 +1,19 @@
+using System.Collections.Generic;
 using Card.Type;
 
 namespace Card
 {
     public class ImpactPoint
     {
-        public ImpactPointType Type;
+        public ImpactPointType PointType;
         public string Description;
-        public int Score;
+        public List<Impact> Impacts;
 
-        public ImpactPoint(ImpactPointType type, string description, int score)
+        public ImpactPoint(ImpactPointType pointType, List<Impact> impacts, string description)
         {
-            Type = type;
+            PointType = pointType;
+            Impacts = impacts;
             Description = description;
-            Score = score;
         }
     }
 }

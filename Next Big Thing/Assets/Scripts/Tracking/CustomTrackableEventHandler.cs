@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Photon.Pun;
 using UnityEngine;
+using Utils;
 
 namespace Tracking
 {
@@ -15,7 +16,7 @@ namespace Tracking
             _gameController = FindObjectOfType<MultiplayerGameManager>();
             _field = GameObject.FindGameObjectWithTag(GameObjectTag.Field.ToString());
 
-            if (!Utils.IsMobile) return;
+            if (!SharedUtils.IsMobile) return;
 
             _gameController.enabled = false;
             _field.SetActive(false);
@@ -23,7 +24,7 @@ namespace Tracking
 
         private void Update()
         {
-            if (PhotonNetwork.IsMasterClient || !gameObject.scene.isLoaded || !Utils.IsMobile)
+            if (PhotonNetwork.IsMasterClient || !gameObject.scene.isLoaded || !SharedUtils.IsMobile)
             {
                 return;
             }
@@ -43,7 +44,7 @@ namespace Tracking
 
         protected override void OnTrackingFound()
         {
-            if (mObserverBehaviour && Utils.IsMobile)
+            if (mObserverBehaviour && SharedUtils.IsMobile)
             {
                 var gameControllerTransform = _gameController.transform;
                 var trackableTransform = mObserverBehaviour.transform;

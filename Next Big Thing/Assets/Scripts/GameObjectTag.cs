@@ -2,6 +2,10 @@ public enum GameObjectTag
 {
     Field,
     Cell,
-    Score,
-    Money
+    TextValue,
+    ScoreValue,
+    MoneyValue,
+    DescriptionSelectionTextValue,
+    FirstSelectionTextValue,
+    SecondSelectionTextValue,
 }

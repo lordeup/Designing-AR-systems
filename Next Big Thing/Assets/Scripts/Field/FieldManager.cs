@@ -1,6 +1,7 @@
 using Card;
 using Player;
 using UnityEngine;
+using Utils;
 
 namespace Field
 {
@@ -21,7 +22,7 @@ namespace Field
 
         private void Update()
         {
-            if (_isInstantiateCreated || Utils.IsNull(Data)) return;
+            if (_isInstantiateCreated || SharedUtils.IsNull(Data)) return;
 
             _playerManager = Data.Player.GetComponent<PlayerControlManager>();
             _isInstantiateCreated = true;
@@ -60,7 +61,7 @@ namespace Field
 
         public void ImpactCellCommand(ImpactPoint card)
         {
-            Data.CompanyCard.Score += card.Score;
+            // Data.CompanyCard.Score += card.Score;
         }
     }
 }

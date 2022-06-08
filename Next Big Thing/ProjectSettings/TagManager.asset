@@ -6,8 +6,12 @@ TagManager:
   tags:
   - Field
   - Cell
-  - Score
-  - Money
+  - ScoreValue
+  - MoneyValue
+  - TextValue
+  - DescriptionSelectionTextValue
+  - FirstSelectionTextValue
+  - SecondSelectionTextValue
   layers:
   - Default
   - TransparentFX

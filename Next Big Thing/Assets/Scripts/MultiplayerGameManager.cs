@@ -5,15 +5,16 @@ using Field;
 using Photon.Pun;
 using Player;
 using Room;
+using Storage;
 using Tracking.CompanyCard;
-using Tracking.ImpactPoint;
 using Tracking.NumberCard;
+using UI;
+using Utils;
 using PhotonPlayer = Photon.Realtime.Player;
 
 public class MultiplayerGameManager : MonoBehaviour
 {
     [SerializeField] private CompanyCardRecognizer companyCardRecognizer;
-    [SerializeField] private ImpactPointRecognizer impactPointRecognizer;
     [SerializeField] private NumberCardRecognizer numberCardRecognizer;
 
     [SerializeField] private UIManager uiManager;
@@ -35,7 +36,7 @@ public class MultiplayerGameManager : MonoBehaviour
 
     private void Update()
     {
-        if (!_isInitialized && !Utils.IsNull(companyCardRecognizer.Card))
+        if (!_isInitialized && !SharedUtils.IsNull(companyCardRecognizer.Card))
         {
             InitField();
             _isInitialized = true;
@@ -67,7 +68,6 @@ public class MultiplayerGameManager : MonoBehaviour
         var cellManager = fieldManager.GetCurrentCellManager();
         Log(cellManager);
         HandleCommand(cellManager);
-        SetMoneyValue();
     }
 
     private void HandleCommand(CellManager cellManager)
@@ -90,13 +90,9 @@ public class MultiplayerGameManager : MonoBehaviour
         }
         else if (cellType == CellType.Impact)
         {
-            impactPointRecognizer.AddListenerToCard(SetImpactPoint);
-            uiManager.Log("Отсканируйте камерой карточку влияния.");
-
-            StartCoroutine(CustomWaitUtils.WaitWhile(
-                () => Utils.IsNull(impactPointRecognizer.Card),
-                () => ExecutePassTurn(ActionAfterFindingImpactCard))
-            );
+            var impactPointManager = uiManager.GetImpactPointManager();
+            impactPointManager.SetActivePanel(true);
+            impactPointManager.SetPanelValues();
         }
     }
 
@@ -112,8 +108,8 @@ public class MultiplayerGameManager : MonoBehaviour
 
         var player = playerType switch
         {
-            PlayerType.Player1 => playerUtils.GetPlayerByType(PlayerType.Player2),
-            PlayerType.Player2 => playerUtils.GetPlayerByType(PlayerType.Player1),
+            // PlayerType.Player1 => playerUtils.GetPlayerByType(PlayerType.Player2),
+            // PlayerType.Player2 => playerUtils.GetPlayerByType(PlayerType.Player1),
             _ => _currentPlayer
         };
 
@@ -138,23 +134,10 @@ public class MultiplayerGameManager : MonoBehaviour
         uiManager.Log("Карта компании: " + type);
     }
 
-    private void SetImpactPoint(ImpactPointType type)
-    {
-        impactPointRecognizer.Card = _storage.GetImpactPointByType(type);
-        uiManager.Log("Карта влияния: " + type);
-    }
-
     private void SetNumberCard(NumberCardType type)
     {
         numberCardRecognizer.AddCard(type);
         uiManager.Log("Карта числа: " + type);
-    }
-
-    private void ActionAfterFindingImpactCard()
-    {
-        fieldManager.ImpactCellCommand(impactPointRecognizer.Card);
-        impactPointRecognizer.Card = null;
-        impactPointRecognizer.RemoveAllListeners();
     }
 
     private void Log(CellManager cellManager)
@@ -170,7 +153,7 @@ public class MultiplayerGameManager : MonoBehaviour
             _ => ""
         };
 
-        if (!string.IsNullOrEmpty(text)) return;
+        if (string.IsNullOrEmpty(text)) return;
         uiManager.SetActionValue(text);
         uiManager.ShowActionPanel();
     }
@@ -207,7 +190,14 @@ public class MultiplayerGameManager : MonoBehaviour
             uiManager.ShowOtherTurnPanel();
         }
 
+        UpdateScoreMoneyValue();
+    }
+
+    private void UpdateScoreMoneyValue()
+    {
+        SetScoreValue();
         SetMoneyValue();
+        StartCoroutine(CustomWaitUtils.WaitForSeconds(ShowDataScoreMoney, 0.5f));
     }
 
     private void SetScoreValue()
@@ -216,10 +206,9 @@ public class MultiplayerGameManager : MonoBehaviour
         var score = fieldManager.Data.CompanyCard.Score;
 
         var properties = playerUtils.GetPlayerScoreCustomProperties();
-        var dictionary = Utils.SetDictionaryValue(properties, userId, score);
+        var dictionary = ArrayUtils.SetDictionaryValue(properties, userId, score);
 
         CustomPropertyUtils.UpdateCustomPropertyByKey(CustomPropertyKeys.PlayerScore, dictionary);
-        UpdateScoreMoneyPanel();
     }
 
     private void SetMoneyValue()
@@ -228,13 +217,12 @@ public class MultiplayerGameManager : MonoBehaviour
         var money = fieldManager.Data.CompanyCard.Money;
 
         var properties = playerUtils.GetPlayerMoneyCustomProperties();
-        var dictionary = Utils.SetDictionaryValue(properties, userId, money);
+        var dictionary = ArrayUtils.SetDictionaryValue(properties, userId, money);
 
         CustomPropertyUtils.UpdateCustomPropertyByKey(CustomPropertyKeys.PlayerMoney, dictionary);
-        UpdateScoreMoneyPanel();
     }
 
-    private void UpdateScoreMoneyPanel()
+    private void ShowDataScoreMoney()
     {
         var players = playerUtils.GetPlayers();
         var scoreProperties = playerUtils.GetPlayerScoreCustomProperties();

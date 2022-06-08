@@ -12,7 +12,7 @@ namespace Card
         {
             Type = type;
             Money = money;
-            Score = 0;
+            Score = 100;
         }
     }
 }
