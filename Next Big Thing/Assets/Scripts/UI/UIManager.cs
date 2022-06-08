@@ -1,4 +1,3 @@
-using System.Globalization;
 using UnityEngine;
 using Utils;
 
@@ -63,7 +62,7 @@ namespace UI
             StartCoroutine(CustomWaitUtils.WaitForSeconds(() => SetActiveActionPanel(false), 3f));
         }
 
-        public void SetMyScoreValue(int score)
+        public void SetMyScoreValue(double score)
         {
             SetScoreValue(myScoreMoneyPanel, score);
         }
@@ -73,7 +72,7 @@ namespace UI
             SetMoneyValue(myScoreMoneyPanel, money);
         }
 
-        public void SetOtherScoreValue(int score)
+        public void SetOtherScoreValue(double score)
         {
             SetScoreValue(otherScoreMoneyPanel, score);
         }
@@ -113,14 +112,14 @@ namespace UI
             UIUtils.SetActivePanel(actionPanel, state);
         }
 
-        private static void SetScoreValue(Component panel, int score)
+        private static void SetScoreValue(Component panel, double score)
         {
-            UIUtils.SetPanelTextValue(panel, GameObjectTag.ScoreValue, score.ToString());
+            UIUtils.SetPanelTextValue(panel, GameObjectTag.ScoreValue, SharedUtils.DoubleToString(score));
         }
 
         private static void SetMoneyValue(Component panel, double money)
         {
-            UIUtils.SetPanelTextValue(panel, GameObjectTag.MoneyValue, money.ToString(CultureInfo.InvariantCulture));
+            UIUtils.SetPanelTextValue(panel, GameObjectTag.MoneyValue, SharedUtils.DoubleToString(money));
         }
     }
 }

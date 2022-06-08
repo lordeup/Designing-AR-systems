@@ -1,4 +1,5 @@
 using Card;
+using Card.Type;
 using Player;
 using UnityEngine;
 using Utils;
@@ -59,9 +60,16 @@ namespace Field
             Data.CompanyCard.Money -= money;
         }
 
-        public void ImpactCellCommand(ImpactPoint card)
+        public void ImpactCellCommand(Impact card)
         {
-            // Data.CompanyCard.Score += card.Score;
+            if (card.ImpactType == ImpactType.Score)
+            {
+                Data.CompanyCard.Score += card.Value;
+            }
+            else if (card.ImpactType == ImpactType.Money)
+            {
+                Data.CompanyCard.Money += card.Value;
+            }
         }
     }
 }

@@ -49,13 +49,12 @@ namespace Room
 
         private static Hashtable GetCustomProperties()
         {
-            var dictionaryMoney = new Dictionary<string, double>();
-            var dictionaryScore = new Dictionary<string, int>();
+            var dictionary = new Dictionary<string, double>();
 
             var properties = new Hashtable
             {
-                { CustomPropertyKeys.PlayerMoney.ToString(), dictionaryMoney },
-                { CustomPropertyKeys.PlayerScore.ToString(), dictionaryScore },
+                { CustomPropertyKeys.PlayerMoney.ToString(), dictionary },
+                { CustomPropertyKeys.PlayerScore.ToString(), dictionary },
             };
             return properties;
         }

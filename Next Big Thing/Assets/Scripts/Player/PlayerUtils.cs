@@ -46,9 +46,9 @@ namespace Player
                 CustomPropertyKeys.PlayerMoney);
         }
 
-        public Dictionary<string, int> GetPlayerScoreCustomProperties()
+        public Dictionary<string, double> GetPlayerScoreCustomProperties()
         {
-            return (Dictionary<string, int>)CustomPropertyUtils.GetCustomPropertyByKey(
+            return (Dictionary<string, double>)CustomPropertyUtils.GetCustomPropertyByKey(
                 CustomPropertyKeys.PlayerScore);
         }
 

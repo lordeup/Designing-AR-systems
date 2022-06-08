@@ -23,6 +23,11 @@ namespace UI
         {
             return _impact;
         }
+        
+        public void ClearImpactItem()
+        {
+            _impact = null;
+        }
 
         public void SetPanelValues()
         {

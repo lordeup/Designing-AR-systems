@@ -93,7 +93,20 @@ public class MultiplayerGameManager : MonoBehaviour
             var impactPointManager = uiManager.GetImpactPointManager();
             impactPointManager.SetActivePanel(true);
             impactPointManager.SetPanelValues();
+
+            StartCoroutine(CustomWaitUtils.WaitWhile(
+                () => SharedUtils.IsNull(impactPointManager.GetSelectedImpactItem()),
+                () => ExecutePassTurn(ActionAfterFindingImpactCard))
+            );
         }
+    }
+
+    private void ActionAfterFindingImpactCard()
+    {
+        var impactPointManager = uiManager.GetImpactPointManager();
+        fieldManager.ImpactCellCommand(impactPointManager.GetSelectedImpactItem());
+        impactPointManager.ClearImpactItem();
+        impactPointManager.SetActivePanel(false);
     }
 
     private void ExecutePassTurn(CustomWaitUtils.DelegateWaitMethod method)

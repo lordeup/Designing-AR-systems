@@ -25,12 +25,6 @@ namespace Storage
             return item;
         }
 
-        // TODO remove
-        public ImpactPoint GetImpactPointByType(ImpactPointType type)
-        {
-            return _impactPoints.Find(item => item.PointType == type);
-        }
-
         private List<Impact> GetImpactsByType(ImpactPointType type)
         {
             return _impacts.Where(item => item.PointType == type).ToList();

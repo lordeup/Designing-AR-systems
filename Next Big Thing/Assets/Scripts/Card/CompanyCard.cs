@@ -6,7 +6,7 @@ namespace Card
     {
         public CompanyCardType Type;
         public double Money;
-        public int Score;
+        public double Score;
 
         public CompanyCard(CompanyCardType type, double money)
         {
