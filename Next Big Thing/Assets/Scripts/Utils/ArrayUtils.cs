@@ -12,12 +12,18 @@ namespace Utils
             return item;
         }
 
+        public static bool IsEmpty<T>(IReadOnlyList<T> list)
+        {
+            return SharedUtils.IsNull(list) || list.Count == 0;
+        }
+
         private static int GetRandomRange(int count)
         {
             return Random.Range(0, count);
         }
-        
-        public static Dictionary<TKey, TValue> SetDictionaryValue<TKey, TValue>(Dictionary<TKey, TValue> objects, TKey key,
+
+        public static Dictionary<TKey, TValue> SetDictionaryValue<TKey, TValue>(Dictionary<TKey, TValue> objects,
+            TKey key,
             TValue value)
         {
             var dictionary = new Dictionary<TKey, TValue>(objects);

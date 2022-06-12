@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Card;
 using Card.Type;
 using Player;
@@ -60,15 +61,18 @@ namespace Field
             Data.CompanyCard.Money -= money;
         }
 
-        public void ImpactCellCommand(Impact card)
+        public void ImpactCellCommand(List<ImpactValue> values)
         {
-            if (card.ImpactType == ImpactType.Score)
+            foreach (var card in values)
             {
-                Data.CompanyCard.Score += card.Value;
-            }
-            else if (card.ImpactType == ImpactType.Money)
-            {
-                Data.CompanyCard.Money += card.Value;
+                if (card.ImpactType == ImpactType.Score)
+                {
+                    Data.CompanyCard.Score += card.Value;
+                }
+                else if (card.ImpactType == ImpactType.Money)
+                {
+                    Data.CompanyCard.Money += card.Value;
+                }
             }
         }
     }

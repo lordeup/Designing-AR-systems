@@ -21,6 +21,8 @@ public class MultiplayerGameManager : MonoBehaviour
     [SerializeField] private FieldManager fieldManager;
     [SerializeField] private PlayerUtils playerUtils;
 
+    public bool isTrackingFound;
+
     private GameStorage _storage;
     private bool _isInitialized;
     private PhotonPlayer _currentPlayer;
@@ -44,8 +46,10 @@ public class MultiplayerGameManager : MonoBehaviour
 
         if (numberCardRecognizer.GetCountCards() == 2)
         {
-            ExecuteMove();
-            numberCardRecognizer.ClearCards();
+            StartCoroutine(CustomWaitUtils.WaitWhile(
+                () => !isTrackingFound,
+                () => ExecutePassTurn(ExecuteMove))
+            );
         }
     }
 
@@ -64,6 +68,7 @@ public class MultiplayerGameManager : MonoBehaviour
     {
         var amount = numberCardRecognizer.GetAmountCards();
         fieldManager.ExecuteMove(amount);
+        numberCardRecognizer.ClearCards();
 
         var cellManager = fieldManager.GetCurrentCellManager();
         Log(cellManager);
@@ -95,7 +100,7 @@ public class MultiplayerGameManager : MonoBehaviour
             impactPointManager.SetPanelValues();
 
             StartCoroutine(CustomWaitUtils.WaitWhile(
-                () => SharedUtils.IsNull(impactPointManager.GetSelectedImpactItem()),
+                () => ArrayUtils.IsEmpty(impactPointManager.GetSelectedImpactValues()),
                 () => ExecutePassTurn(ActionAfterFindingImpactCard))
             );
         }
@@ -104,7 +109,7 @@ public class MultiplayerGameManager : MonoBehaviour
     private void ActionAfterFindingImpactCard()
     {
         var impactPointManager = uiManager.GetImpactPointManager();
-        fieldManager.ImpactCellCommand(impactPointManager.GetSelectedImpactItem());
+        fieldManager.ImpactCellCommand(impactPointManager.GetSelectedImpactValues());
         impactPointManager.ClearImpactItem();
         impactPointManager.SetActivePanel(false);
     }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Card;
 using Storage;
@@ -11,44 +12,44 @@ namespace UI
         [SerializeField] private RectTransform panel;
 
         private ImpactPointStorage _impactPointStorage;
-        private ImpactPoint _impactPoint;
-        private Impact _impact;
+        private List<Impact> _impacts;
+        private List<ImpactValue> _impactValues;
 
         private void Start()
         {
             _impactPointStorage = gameObject.AddComponent<ImpactPointStorage>();
         }
 
-        public Impact GetSelectedImpactItem()
+        public List<ImpactValue> GetSelectedImpactValues()
         {
-            return _impact;
+            return _impactValues;
         }
-        
+
         public void ClearImpactItem()
         {
-            _impact = null;
+            _impactValues.Clear();
         }
 
         public void SetPanelValues()
         {
-            _impactPoint = _impactPointStorage.GetRandomImpactPoint();
-            var impacts = _impactPoint.Impacts;
+            var impactPoint = _impactPointStorage.GetRandomImpactPoint();
+            _impacts = _impactPointStorage.GetImpactsByType(impactPoint.PointType);
 
-            if (impacts.Count < 2) return;
+            if (_impacts.Count < 2) return;
 
-            UIUtils.SetPanelTextValue(panel, GameObjectTag.DescriptionSelectionTextValue, _impactPoint.Description);
-            UIUtils.SetPanelTextValue(panel, GameObjectTag.FirstSelectionTextValue, impacts.First().Description);
-            UIUtils.SetPanelTextValue(panel, GameObjectTag.SecondSelectionTextValue, impacts.Last().Description);
+            UIUtils.SetPanelTextValue(panel, GameObjectTag.DescriptionSelectionTextValue, impactPoint.Description);
+            UIUtils.SetPanelTextValue(panel, GameObjectTag.FirstSelectionTextValue, _impacts.First().Description);
+            UIUtils.SetPanelTextValue(panel, GameObjectTag.SecondSelectionTextValue, _impacts.Last().Description);
         }
 
         public void SelectFirstImpactItem()
         {
-            _impact = _impactPoint.Impacts.First();
+            _impactValues = _impacts.First().ImpactValues;
         }
 
         public void SelectSecondImpactItem()
         {
-            _impact = _impactPoint.Impacts.Last();
+            _impactValues = _impacts.Last().ImpactValues;
         }
 
         public void SetActivePanel(bool state)

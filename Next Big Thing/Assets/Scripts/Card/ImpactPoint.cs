@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Card.Type;
 
 namespace Card
@@ -7,12 +6,10 @@ namespace Card
     {
         public ImpactPointType PointType;
         public string Description;
-        public List<Impact> Impacts;
 
-        public ImpactPoint(ImpactPointType pointType, List<Impact> impacts, string description)
+        public ImpactPoint(ImpactPointType pointType, string description)
         {
             PointType = pointType;
-            Impacts = impacts;
             Description = description;
         }
     }

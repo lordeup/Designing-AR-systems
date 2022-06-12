@@ -36,6 +36,7 @@ namespace Tracking
         {
             if (mObserverBehaviour)
             {
+                _gameController.isTrackingFound = false;
                 HidingPlayers();
             }
 
@@ -54,6 +55,7 @@ namespace Tracking
                 gameControllerTransform.localPosition = Vector3.zero;
                 gameControllerTransform.localRotation = Quaternion.identity;
 
+                _gameController.isTrackingFound = true;
                 _gameController.enabled = true;
                 _field.SetActive(true);
 
