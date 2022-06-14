@@ -9,6 +9,11 @@ namespace Utils
         {
             panel.gameObject.SetActive(state);
         }
+        
+        public static bool GetActiveGameObject(Component component)
+        {
+            return component.gameObject.activeSelf;
+        }
 
         public static void SetPanelTextValue(Component panel, GameObjectTag tag, string text)
         {

@@ -28,9 +28,9 @@ namespace Tracking.NumberCard
             _cards.Clear();
         }
 
-        public int GetAmountCards()
+        public int GetAmountCards(int count)
         {
-            return _cards.Sum(card => (int)card);
+            return _cards.Take(count).Sum(card => (int)card);
         }
     }
 }

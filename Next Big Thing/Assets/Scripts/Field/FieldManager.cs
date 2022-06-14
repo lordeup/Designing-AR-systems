@@ -31,10 +31,12 @@ namespace Field
             UpdatePlayerPosition();
         }
 
-        public void ExecuteMove(int newIndex)
+        public void ExecuteMove(int count)
         {
             var currentIndex = System.Array.IndexOf(_cells, currentCell);
-            if (currentIndex == _cells.Length - 1) return;
+            var maxIndex = _cells.Length - 1;
+            var amount = currentIndex + count;
+            var newIndex = amount > maxIndex ? maxIndex : amount;
 
             currentCell = _cells[newIndex];
             UpdatePlayerPosition();

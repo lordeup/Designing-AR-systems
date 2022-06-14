@@ -24,42 +24,62 @@ namespace UI
             return impactPointManager;
         }
 
-        public void Log(string text)
+        public void WaitTurnPanelActive(SharedUtils.DelegateMethod method)
         {
-            // UIUtils.SetPanelTextValue(logPanel, text);
+            WaitGameObjectActive(yourTurnPanel, method);
+            WaitGameObjectActive(otherTurnPanel, method);
         }
 
-        public void SetActionValue(string text)
+        public void WaitActionPanelActive(SharedUtils.DelegateMethod method)
         {
-            UIUtils.SetPanelTextValue(actionPanel, GameObjectTag.TextValue, text);
+            WaitGameObjectActive(actionPanel, method);
+        }
+
+        public void Log(string text)
+        {
+            UIUtils.SetPanelTextValue(logPanel, GameObjectTag.TextValue, text);
         }
 
         public void ShowWinningPanel()
         {
-            StartCoroutine(CustomWaitUtils.WaitForSeconds(() => UIUtils.SetActivePanel(winningPanel, true), 1f));
+            WaitForSeconds(() => UIUtils.SetActivePanel(winningPanel, true), 1f);
         }
 
         public void ShowLosingPanel()
         {
-            StartCoroutine(CustomWaitUtils.WaitForSeconds(() => UIUtils.SetActivePanel(losingPanel, true), 1f));
+            WaitForSeconds(() => UIUtils.SetActivePanel(losingPanel, true), 1f);
+        }
+
+        public void SetActiveUI(bool state)
+        {
+            SetActiveMyScoreMoneyPanel(state);
+            SetActiveOtherScoreMoneyPanel(state);
+            SetActiveLogPanel(state);
         }
 
         public void ShowYourTurn()
         {
             SetActiveYourTurnPanel(true);
-            StartCoroutine(CustomWaitUtils.WaitForSeconds(() => SetActiveYourTurnPanel(false), 3f));
+            WaitForSeconds(() => SetActiveYourTurnPanel(false), 3f);
         }
 
         public void ShowOtherTurnPanel()
         {
             SetActiveOtherTurnPanel(true);
-            StartCoroutine(CustomWaitUtils.WaitForSeconds(() => SetActiveOtherTurnPanel(false), 3f));
+            WaitForSeconds(() => SetActiveOtherTurnPanel(false), 3f);
         }
 
-        public void ShowActionPanel()
+        public void ShowActionPanel(string text)
         {
+            if (string.IsNullOrEmpty(text))
+            {
+                return;
+            }
+
+            UIUtils.SetPanelTextValue(actionPanel, GameObjectTag.TextValue, text);
+
             SetActiveActionPanel(true);
-            StartCoroutine(CustomWaitUtils.WaitForSeconds(() => SetActiveActionPanel(false), 3f));
+            WaitForSeconds(() => SetActiveActionPanel(false), 3f);
         }
 
         public void SetMyScoreValue(double score)
@@ -92,17 +112,17 @@ namespace UI
             UIUtils.SetActivePanel(otherTurnPanel, state);
         }
 
-        public void SetActiveLogPanel(bool state)
+        private void SetActiveLogPanel(bool state)
         {
             UIUtils.SetActivePanel(logPanel, state);
         }
 
-        public void SetActiveMyScoreMoneyPanel(bool state)
+        private void SetActiveMyScoreMoneyPanel(bool state)
         {
             UIUtils.SetActivePanel(myScoreMoneyPanel, state);
         }
 
-        public void SetActiveOtherScoreMoneyPanel(bool state)
+        private void SetActiveOtherScoreMoneyPanel(bool state)
         {
             UIUtils.SetActivePanel(otherScoreMoneyPanel, state);
         }
@@ -120,6 +140,25 @@ namespace UI
         private static void SetMoneyValue(Component panel, double money)
         {
             UIUtils.SetPanelTextValue(panel, GameObjectTag.MoneyValue, SharedUtils.DoubleToString(money));
+        }
+
+        private void WaitForSeconds(SharedUtils.DelegateMethod method, float second)
+        {
+            StartCoroutine(CustomWaitUtils.WaitForSeconds(() => method?.Invoke(), second));
+        }
+
+        // TODO remove
+        private void WaitGameObjectActive(Component component)
+        {
+            StartCoroutine(CustomWaitUtils.WaitWhile(() => UIUtils.GetActiveGameObject(component)));
+        }
+
+        private void WaitGameObjectActive(Component component, SharedUtils.DelegateMethod method)
+        {
+            StartCoroutine(CustomWaitUtils.WaitWhile(
+                () => UIUtils.GetActiveGameObject(component),
+                () => method?.Invoke())
+            );
         }
     }
 }

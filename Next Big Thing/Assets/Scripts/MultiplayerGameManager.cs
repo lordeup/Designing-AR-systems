@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Card.Type;
@@ -28,6 +29,8 @@ public class MultiplayerGameManager : MonoBehaviour
     private PhotonPlayer _currentPlayer;
     private PhotonView _photonView;
 
+    private const int CountNumberCard = 2;
+
     private void Start()
     {
         _storage = gameObject.AddComponent<GameStorage>();
@@ -44,12 +47,11 @@ public class MultiplayerGameManager : MonoBehaviour
             _isInitialized = true;
         }
 
-        if (numberCardRecognizer.GetCountCards() == 2)
+        if (numberCardRecognizer.GetCountCards() >= CountNumberCard)
         {
-            StartCoroutine(CustomWaitUtils.WaitWhile(
-                () => !isTrackingFound,
-                () => ExecutePassTurn(ExecuteMove))
-            );
+            ExecuteMove();
+            numberCardRecognizer.ClearCards();
+            // StartCoroutine(CustomWaitUtils.WaitWhile(() => !isTrackingFound, ExecuteMove));
         }
     }
 
@@ -61,18 +63,18 @@ public class MultiplayerGameManager : MonoBehaviour
         _currentPlayer = playerUtils.GetMasterPlayer();
 
         ShowTurnPlayer();
-        SetActiveUI(true);
+        uiManager.SetActiveUI(true);
     }
 
     private void ExecuteMove()
     {
-        var amount = numberCardRecognizer.GetAmountCards();
+        var amount = numberCardRecognizer.GetAmountCards(CountNumberCard);
         fieldManager.ExecuteMove(amount);
-        numberCardRecognizer.ClearCards();
 
         var cellManager = fieldManager.GetCurrentCellManager();
         Log(cellManager);
-        HandleCommand(cellManager);
+
+        uiManager.WaitActionPanelActive(() => HandleCommand(cellManager));
     }
 
     private void HandleCommand(CellManager cellManager)
@@ -82,7 +84,7 @@ public class MultiplayerGameManager : MonoBehaviour
 
         if (cellType == CellType.Finish)
         {
-            SetActiveUI(false);
+            uiManager.SetActiveUI(false);
             CheckForWin();
         }
         else if (cellType == CellType.Profit)
@@ -114,7 +116,7 @@ public class MultiplayerGameManager : MonoBehaviour
         impactPointManager.SetActivePanel(false);
     }
 
-    private void ExecutePassTurn(CustomWaitUtils.DelegateWaitMethod method)
+    private void ExecutePassTurn(SharedUtils.DelegateMethod method)
     {
         method?.Invoke();
         PassTurn();
@@ -171,28 +173,7 @@ public class MultiplayerGameManager : MonoBehaviour
             _ => ""
         };
 
-        if (string.IsNullOrEmpty(text)) return;
-        uiManager.SetActionValue(text);
-        uiManager.ShowActionPanel();
-    }
-
-    private void CheckForWin()
-    {
-        var properties = playerUtils.GetPlayerMoneyCustomProperties();
-        var maxValueKey = properties.OrderByDescending(item => item.Value).First().Key;
-        ShowPlayerWin(maxValueKey);
-    }
-
-    private void ShowPlayerWin(string userId)
-    {
-        if (IsMine(userId))
-        {
-            uiManager.ShowWinningPanel();
-        }
-        else
-        {
-            uiManager.ShowLosingPanel();
-        }
+        uiManager.ShowActionPanel(text);
     }
 
     private void ShowTurnPlayer()
@@ -208,7 +189,7 @@ public class MultiplayerGameManager : MonoBehaviour
             uiManager.ShowOtherTurnPanel();
         }
 
-        UpdateScoreMoneyValue();
+        uiManager.WaitTurnPanelActive(UpdateScoreMoneyValue);
     }
 
     private void UpdateScoreMoneyValue()
@@ -223,7 +204,7 @@ public class MultiplayerGameManager : MonoBehaviour
         var userId = GetLocalUserId();
         var score = fieldManager.Data.CompanyCard.Score;
 
-        var properties = playerUtils.GetPlayerScoreCustomProperties();
+        var properties = GetScoreProperties();
         var dictionary = ArrayUtils.SetDictionaryValue(properties, userId, score);
 
         CustomPropertyUtils.UpdateCustomPropertyByKey(CustomPropertyKeys.PlayerScore, dictionary);
@@ -234,7 +215,7 @@ public class MultiplayerGameManager : MonoBehaviour
         var userId = GetLocalUserId();
         var money = fieldManager.Data.CompanyCard.Money;
 
-        var properties = playerUtils.GetPlayerMoneyCustomProperties();
+        var properties = GetMoneyProperties();
         var dictionary = ArrayUtils.SetDictionaryValue(properties, userId, money);
 
         CustomPropertyUtils.UpdateCustomPropertyByKey(CustomPropertyKeys.PlayerMoney, dictionary);
@@ -243,36 +224,66 @@ public class MultiplayerGameManager : MonoBehaviour
     private void ShowDataScoreMoney()
     {
         var players = playerUtils.GetPlayers();
-        var scoreProperties = playerUtils.GetPlayerScoreCustomProperties();
-        var moneyProperties = playerUtils.GetPlayerMoneyCustomProperties();
+        var scoreProperties = GetScoreProperties();
+        var moneyProperties = GetMoneyProperties();
 
         foreach (var player in players)
         {
             var userId = player.UserId;
             if (scoreProperties.TryGetValue(userId, out var score))
             {
-                if (IsMine(userId))
+                SetScoreValue(userId, score);
+                if (score <= 0)
                 {
-                    uiManager.SetMyScoreValue(score);
-                }
-                else
-                {
-                    uiManager.SetOtherScoreValue(score);
+                    ShowPlayerLose(userId);
                 }
             }
 
             if (moneyProperties.TryGetValue(userId, out var money))
             {
-                if (IsMine(userId))
+                SetMoneyValue(userId, money);
+                if (money <= 0)
                 {
-                    uiManager.SetMyMoneyValue(money);
-                }
-                else
-                {
-                    uiManager.SetOtherMoneyValue(money);
+                    ShowPlayerLose(userId);
                 }
             }
         }
+    }
+
+    private void CheckForWin()
+    {
+        var moneyProperties = GetMoneyProperties();
+        var maxValueKey = moneyProperties.OrderByDescending(item => item.Value).First().Key;
+        ShowPlayerWin(maxValueKey);
+    }
+
+    private void ShowPlayerWin(string userId)
+    {
+        ExecuteUserAction(userId, () => uiManager.ShowWinningPanel(), () => uiManager.ShowLosingPanel());
+    }
+
+    private void ShowPlayerLose(string userId)
+    {
+        ExecuteUserAction(userId, () => uiManager.ShowLosingPanel(), () => uiManager.ShowWinningPanel());
+    }
+
+    private void SetScoreValue(string userId, double value)
+    {
+        ExecuteUserAction(userId, () => uiManager.SetMyScoreValue(value), () => uiManager.SetOtherScoreValue(value));
+    }
+
+    private void SetMoneyValue(string userId, double value)
+    {
+        ExecuteUserAction(userId, () => uiManager.SetMyMoneyValue(value), () => uiManager.SetOtherMoneyValue(value));
+    }
+
+    private void ExecuteUserAction(string userId, SharedUtils.DelegateMethod mineMethod,
+        SharedUtils.DelegateMethod otherMethod)
+    {
+        if (IsMine(userId))
+            mineMethod?.Invoke();
+        else
+            otherMethod?.Invoke();
     }
 
     private bool IsMine(string userId)
@@ -285,11 +296,13 @@ public class MultiplayerGameManager : MonoBehaviour
         return playerUtils.GetLocalPlayer().UserId;
     }
 
-    // TODO move?
-    private void SetActiveUI(bool state)
+    private Dictionary<string, double> GetScoreProperties()
     {
-        uiManager.SetActiveMyScoreMoneyPanel(state);
-        uiManager.SetActiveOtherScoreMoneyPanel(state);
-        uiManager.SetActiveLogPanel(state);
+        return playerUtils.GetPlayerScoreCustomProperties();
+    }
+
+    private Dictionary<string, double> GetMoneyProperties()
+    {
+        return playerUtils.GetPlayerMoneyCustomProperties();
     }
 }
