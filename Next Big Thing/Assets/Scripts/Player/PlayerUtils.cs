@@ -4,6 +4,7 @@ using System.Linq;
 using Photon.Pun;
 using Room;
 using UnityEngine;
+using Utils;
 using PhotonPlayer = Photon.Realtime.Player;
 
 namespace Player
@@ -17,7 +18,7 @@ namespace Player
 
         public GameObject InitializationPlayer()
         {
-            var playerType = GetPlayerType(GetLocalPlayer());
+            var playerType = GetPlayerType(PhotonNetworkUtils.GetLocalPlayer());
             var player = GetPlayer(playerType);
             return PhotonNetwork.Instantiate(player.name, InitPlayerPosition, Quaternion.identity);
         }
@@ -52,11 +53,6 @@ namespace Player
                 CustomPropertyKeys.PlayerScore);
         }
 
-        public PhotonPlayer GetLocalPlayer()
-        {
-            return PhotonNetwork.LocalPlayer;
-        }
-
         public PlayerType GetPlayerType(PhotonPlayer player)
         {
             return (PlayerType)CustomPropertyUtils.GetPlayerCustomPropertyByKey(CustomPropertyKeys.PlayerType, player);
@@ -64,7 +60,7 @@ namespace Player
 
         public IEnumerable<PhotonPlayer> GetPlayers()
         {
-            return PhotonNetwork.PlayerList;
+            return PhotonNetworkUtils.GetPlayers();
         }
 
         private Transform GetPlayer(PlayerType playerType)

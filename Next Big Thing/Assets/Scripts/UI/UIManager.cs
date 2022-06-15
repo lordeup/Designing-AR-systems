@@ -40,14 +40,30 @@ namespace UI
             UIUtils.SetPanelTextValue(logPanel, GameObjectTag.TextValue, text);
         }
 
-        public void ShowWinningPanel()
+        public void ShowPlayerWin(string userId)
         {
-            WaitForSeconds(() => UIUtils.SetActivePanel(winningPanel, true), 1f);
+            UIUtils.ExecuteUserAction(userId, ShowWinningPanel, ShowLosingPanel);
         }
 
-        public void ShowLosingPanel()
+        public void ShowPlayerLose(string userId)
         {
-            WaitForSeconds(() => UIUtils.SetActivePanel(losingPanel, true), 1f);
+            UIUtils.ExecuteUserAction(userId, ShowLosingPanel, ShowWinningPanel);
+        }
+
+        public void ShowScoreValue(string userId, double value)
+        {
+            UIUtils.ExecuteUserAction(userId,
+                () => SetScoreValue(myScoreMoneyPanel, value),
+                () => SetScoreValue(otherScoreMoneyPanel, value)
+            );
+        }
+
+        public void ShowMoneyValue(string userId, double value)
+        {
+            UIUtils.ExecuteUserAction(userId,
+                () => SetMoneyValue(myScoreMoneyPanel, value),
+                () => SetMoneyValue(otherScoreMoneyPanel, value)
+            );
         }
 
         public void SetActiveUI(bool state)
@@ -82,24 +98,14 @@ namespace UI
             WaitForSeconds(() => SetActiveActionPanel(false), 3f);
         }
 
-        public void SetMyScoreValue(double score)
+        private void ShowWinningPanel()
         {
-            SetScoreValue(myScoreMoneyPanel, score);
+            WaitForSeconds(() => UIUtils.SetActivePanel(winningPanel, true), 1f);
         }
 
-        public void SetMyMoneyValue(double money)
+        private void ShowLosingPanel()
         {
-            SetMoneyValue(myScoreMoneyPanel, money);
-        }
-
-        public void SetOtherScoreValue(double score)
-        {
-            SetScoreValue(otherScoreMoneyPanel, score);
-        }
-
-        public void SetOtherMoneyValue(double money)
-        {
-            SetMoneyValue(otherScoreMoneyPanel, money);
+            WaitForSeconds(() => UIUtils.SetActivePanel(losingPanel, true), 1f);
         }
 
         private void SetActiveYourTurnPanel(bool state)
@@ -145,12 +151,6 @@ namespace UI
         private void WaitForSeconds(SharedUtils.DelegateMethod method, float second)
         {
             StartCoroutine(CustomWaitUtils.WaitForSeconds(() => method?.Invoke(), second));
-        }
-
-        // TODO remove
-        private void WaitGameObjectActive(Component component)
-        {
-            StartCoroutine(CustomWaitUtils.WaitWhile(() => UIUtils.GetActiveGameObject(component)));
         }
 
         private void WaitGameObjectActive(Component component, SharedUtils.DelegateMethod method)

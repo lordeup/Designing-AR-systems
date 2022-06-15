@@ -178,7 +178,10 @@ public class MultiplayerGameManager : MonoBehaviour
 
     private void ShowTurnPlayer()
     {
-        if (IsMine(_currentPlayer.UserId))
+        SetScoreValue();
+        SetMoneyValue();
+
+        if (PhotonNetworkUtils.IsMine(_currentPlayer.UserId))
         {
             numberCardRecognizer.AddListenerToCard(SetNumberCard);
             uiManager.ShowYourTurn();
@@ -189,19 +192,12 @@ public class MultiplayerGameManager : MonoBehaviour
             uiManager.ShowOtherTurnPanel();
         }
 
-        uiManager.WaitTurnPanelActive(UpdateScoreMoneyValue);
-    }
-
-    private void UpdateScoreMoneyValue()
-    {
-        SetScoreValue();
-        SetMoneyValue();
-        StartCoroutine(CustomWaitUtils.WaitForSeconds(ShowDataScoreMoney, 0.5f));
+        uiManager.WaitTurnPanelActive(ShowDataScoreMoney);
     }
 
     private void SetScoreValue()
     {
-        var userId = GetLocalUserId();
+        var userId = PhotonNetworkUtils.GetLocalUserId();
         var score = fieldManager.Data.CompanyCard.Score;
 
         var properties = GetScoreProperties();
@@ -212,7 +208,7 @@ public class MultiplayerGameManager : MonoBehaviour
 
     private void SetMoneyValue()
     {
-        var userId = GetLocalUserId();
+        var userId = PhotonNetworkUtils.GetLocalUserId();
         var money = fieldManager.Data.CompanyCard.Money;
 
         var properties = GetMoneyProperties();
@@ -232,19 +228,19 @@ public class MultiplayerGameManager : MonoBehaviour
             var userId = player.UserId;
             if (scoreProperties.TryGetValue(userId, out var score))
             {
-                SetScoreValue(userId, score);
+                uiManager.ShowScoreValue(userId, score);
                 if (score <= 0)
                 {
-                    ShowPlayerLose(userId);
+                    uiManager.ShowPlayerLose(userId);
                 }
             }
 
             if (moneyProperties.TryGetValue(userId, out var money))
             {
-                SetMoneyValue(userId, money);
+                uiManager.ShowMoneyValue(userId, money);
                 if (money <= 0)
                 {
-                    ShowPlayerLose(userId);
+                    uiManager.ShowPlayerLose(userId);
                 }
             }
         }
@@ -254,46 +250,7 @@ public class MultiplayerGameManager : MonoBehaviour
     {
         var moneyProperties = GetMoneyProperties();
         var maxValueKey = moneyProperties.OrderByDescending(item => item.Value).First().Key;
-        ShowPlayerWin(maxValueKey);
-    }
-
-    private void ShowPlayerWin(string userId)
-    {
-        ExecuteUserAction(userId, () => uiManager.ShowWinningPanel(), () => uiManager.ShowLosingPanel());
-    }
-
-    private void ShowPlayerLose(string userId)
-    {
-        ExecuteUserAction(userId, () => uiManager.ShowLosingPanel(), () => uiManager.ShowWinningPanel());
-    }
-
-    private void SetScoreValue(string userId, double value)
-    {
-        ExecuteUserAction(userId, () => uiManager.SetMyScoreValue(value), () => uiManager.SetOtherScoreValue(value));
-    }
-
-    private void SetMoneyValue(string userId, double value)
-    {
-        ExecuteUserAction(userId, () => uiManager.SetMyMoneyValue(value), () => uiManager.SetOtherMoneyValue(value));
-    }
-
-    private void ExecuteUserAction(string userId, SharedUtils.DelegateMethod mineMethod,
-        SharedUtils.DelegateMethod otherMethod)
-    {
-        if (IsMine(userId))
-            mineMethod?.Invoke();
-        else
-            otherMethod?.Invoke();
-    }
-
-    private bool IsMine(string userId)
-    {
-        return GetLocalUserId().Equals(userId);
-    }
-
-    private string GetLocalUserId()
-    {
-        return playerUtils.GetLocalPlayer().UserId;
+        uiManager.ShowPlayerWin(maxValueKey);
     }
 
     private Dictionary<string, double> GetScoreProperties()

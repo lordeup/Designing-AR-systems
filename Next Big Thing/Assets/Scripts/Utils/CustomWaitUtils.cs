@@ -17,10 +17,5 @@ namespace Utils
             yield return new WaitWhile(condition);
             method?.Invoke();
         }
-        
-        public static IEnumerator WaitWhile(Func<bool> condition)
-        {
-            yield return new WaitWhile(condition);
-        }
     }
 }
