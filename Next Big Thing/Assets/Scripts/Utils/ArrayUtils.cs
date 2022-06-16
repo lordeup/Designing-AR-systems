@@ -22,12 +22,6 @@ namespace Utils
             return Random.Range(0, count);
         }
 
-        public static TValue GetDictionaryValue<TKey, TValue>(TKey key, Dictionary<TKey, TValue> dictionary)
-        {
-            dictionary.TryGetValue(key, out var value);
-            return value;
-        }
-
         public static Dictionary<TKey, TValue> SetDictionaryValue<TKey, TValue>(Dictionary<TKey, TValue> objects,
             TKey key,
             TValue value)

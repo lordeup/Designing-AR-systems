@@ -50,7 +50,6 @@ public class MultiplayerGameManager : MonoBehaviour
         if (numberCardRecognizer.GetCountCards() >= CountNumberCard)
         {
             ExecuteMove();
-            numberCardRecognizer.ClearCards();
             // StartCoroutine(CustomWaitUtils.WaitWhile(() => !isTrackingFound, ExecuteMove));
         }
     }
@@ -72,9 +71,10 @@ public class MultiplayerGameManager : MonoBehaviour
         fieldManager.ExecuteMove(amount);
 
         var cellManager = fieldManager.GetCurrentCellManager();
-        Log(cellManager);
+        CellLogging(cellManager);
 
         uiManager.WaitActionPanelActive(() => HandleCommand(cellManager));
+        numberCardRecognizer.ClearCards();
     }
 
     private void HandleCommand(CellManager cellManager)
@@ -128,8 +128,8 @@ public class MultiplayerGameManager : MonoBehaviour
 
         var player = playerType switch
         {
-            // PlayerType.Player1 => playerUtils.GetPlayerByType(PlayerType.Player2),
-            // PlayerType.Player2 => playerUtils.GetPlayerByType(PlayerType.Player1),
+            PlayerType.Player1 => playerUtils.GetPlayerByType(PlayerType.Player2),
+            PlayerType.Player2 => playerUtils.GetPlayerByType(PlayerType.Player1),
             _ => _currentPlayer
         };
 
@@ -156,11 +156,13 @@ public class MultiplayerGameManager : MonoBehaviour
 
     private void SetNumberCard(NumberCardType type)
     {
+        if (numberCardRecognizer.GetCountCards() >= CountNumberCard) return;
+
         numberCardRecognizer.AddCard(type);
         uiManager.Log("Карта числа: " + type);
     }
 
-    private void Log(CellManager cellManager)
+    private void CellLogging(CellManager cellManager)
     {
         var cellName = cellManager.name;
         var cellMoney = cellManager.money;
