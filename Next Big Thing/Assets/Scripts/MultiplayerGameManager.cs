@@ -1,11 +1,8 @@
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using Card.Type;
 using Field;
 using Photon.Pun;
 using Player;
-using Room;
 using Storage;
 using Tracking.CompanyCard;
 using Tracking.NumberCard;
@@ -26,8 +23,16 @@ public class MultiplayerGameManager : MonoBehaviour
 
     private GameStorage _storage;
     private bool _isInitialized;
-    private PhotonPlayer _currentPlayer;
     private PhotonView _photonView;
+
+    private PhotonPlayer _currentPlayer;
+    private double _myMoney;
+    private double _myScore;
+    private double _otherMoney;
+    private double _otherScore;
+
+    private bool _isMyFinish;
+    private bool _isOtherFinish;
 
     private const int CountNumberCard = 2;
 
@@ -62,6 +67,7 @@ public class MultiplayerGameManager : MonoBehaviour
         _currentPlayer = playerUtils.GetMasterPlayer();
 
         ShowTurnPlayer();
+        SyncParameters();
         uiManager.SetActiveUI(true);
     }
 
@@ -85,7 +91,7 @@ public class MultiplayerGameManager : MonoBehaviour
         if (cellType == CellType.Finish)
         {
             uiManager.SetActiveUI(false);
-            CheckForWin();
+            ExecutePassTurn(PlayerFinished);
         }
         else if (cellType == CellType.Profit)
         {
@@ -119,6 +125,7 @@ public class MultiplayerGameManager : MonoBehaviour
     private void ExecutePassTurn(SharedUtils.DelegateMethod method)
     {
         method?.Invoke();
+        SyncParameters();
         PassTurn();
     }
 
@@ -136,6 +143,33 @@ public class MultiplayerGameManager : MonoBehaviour
         SetCurrentPlayer(player.UserId);
     }
 
+    private void SyncParameters()
+    {
+        var userId = PhotonNetworkUtils.GetLocalUserId();
+        var score = fieldManager.Data.CompanyCard.Score;
+        var money = fieldManager.Data.CompanyCard.Money;
+
+        _photonView.RPC("SyncParametersRpc", RpcTarget.All, userId, score, money);
+    }
+
+    [PunRPC]
+    private void SyncParametersRpc(string userId, double score, double money)
+    {
+        if (PhotonNetworkUtils.IsMine(userId))
+        {
+            _myScore = score;
+            _myMoney = money;
+        }
+        else
+        {
+            _otherScore = score;
+            _otherMoney = money;
+        }
+
+        ShowDataScoreMoney();
+        CheckForWin();
+    }
+
     private void SetCurrentPlayer(string userId)
     {
         _photonView.RPC("SetCurrentPlayerRpc", RpcTarget.All, userId);
@@ -146,6 +180,18 @@ public class MultiplayerGameManager : MonoBehaviour
     {
         _currentPlayer = playerUtils.GetPlayerById(userId);
         ShowTurnPlayer();
+    }
+
+    private void PlayerFinished()
+    {
+        var userId = PhotonNetworkUtils.GetLocalUserId();
+        _photonView.RPC("PlayerFinishedRpc", RpcTarget.All, userId);
+    }
+
+    [PunRPC]
+    private void PlayerFinishedRpc(string userId)
+    {
+        UIUtils.ExecuteUserAction(userId, () => _isMyFinish = true, () => _isOtherFinish = true);
     }
 
     private void SetCompanyCard(CompanyCardType type)
@@ -180,9 +226,6 @@ public class MultiplayerGameManager : MonoBehaviour
 
     private void ShowTurnPlayer()
     {
-        SetScoreValue();
-        SetMoneyValue();
-
         if (PhotonNetworkUtils.IsMine(_currentPlayer.UserId))
         {
             numberCardRecognizer.AddListenerToCard(SetNumberCard);
@@ -193,75 +236,49 @@ public class MultiplayerGameManager : MonoBehaviour
             numberCardRecognizer.RemoveAllListeners();
             uiManager.ShowOtherTurnPanel();
         }
-
-        uiManager.WaitTurnPanelActive(ShowDataScoreMoney);
-    }
-
-    private void SetScoreValue()
-    {
-        var userId = PhotonNetworkUtils.GetLocalUserId();
-        var score = fieldManager.Data.CompanyCard.Score;
-
-        var properties = GetScoreProperties();
-        var dictionary = ArrayUtils.SetDictionaryValue(properties, userId, score);
-
-        CustomPropertyUtils.UpdateCustomPropertyByKey(CustomPropertyKeys.PlayerScore, dictionary);
-    }
-
-    private void SetMoneyValue()
-    {
-        var userId = PhotonNetworkUtils.GetLocalUserId();
-        var money = fieldManager.Data.CompanyCard.Money;
-
-        var properties = GetMoneyProperties();
-        var dictionary = ArrayUtils.SetDictionaryValue(properties, userId, money);
-
-        CustomPropertyUtils.UpdateCustomPropertyByKey(CustomPropertyKeys.PlayerMoney, dictionary);
     }
 
     private void ShowDataScoreMoney()
     {
-        var players = playerUtils.GetPlayers();
-        var scoreProperties = GetScoreProperties();
-        var moneyProperties = GetMoneyProperties();
+        uiManager.SetMyScoreValue(_myScore);
+        uiManager.SetMyMoneyValue(_myMoney);
 
-        foreach (var player in players)
-        {
-            var userId = player.UserId;
-            if (scoreProperties.TryGetValue(userId, out var score))
-            {
-                uiManager.ShowScoreValue(userId, score);
-                if (score <= 0)
-                {
-                    uiManager.ShowPlayerLose(userId);
-                }
-            }
-
-            if (moneyProperties.TryGetValue(userId, out var money))
-            {
-                uiManager.ShowMoneyValue(userId, money);
-                if (money <= 0)
-                {
-                    uiManager.ShowPlayerLose(userId);
-                }
-            }
-        }
+        uiManager.SetOtherScoreValue(_otherScore);
+        uiManager.SetOtherMoneyValue(_otherMoney);
     }
 
     private void CheckForWin()
     {
-        var moneyProperties = GetMoneyProperties();
-        var maxValueKey = moneyProperties.OrderByDescending(item => item.Value).First().Key;
-        uiManager.ShowPlayerWin(maxValueKey);
+        var userId = PhotonNetworkUtils.GetLocalUserId();
+
+        if (CheckInvalidData(_myScore, _myMoney))
+        {
+            uiManager.ShowPlayerLose(userId);
+        }
+        else if (CheckInvalidData(_otherScore, _otherMoney))
+        {
+            uiManager.ShowPlayerWin(userId);
+        }
+
+        if (_isMyFinish && _isOtherFinish)
+        {
+            if (_myMoney > _otherMoney)
+            {
+                uiManager.ShowPlayerWin(userId);
+            }
+            else if (_myMoney < _otherMoney)
+            {
+                uiManager.ShowPlayerLose(userId);
+            }
+            else
+            {
+                uiManager.ShowDrawPanel();
+            }
+        }
     }
 
-    private Dictionary<string, double> GetScoreProperties()
+    private static bool CheckInvalidData(double score, double money)
     {
-        return playerUtils.GetPlayerScoreCustomProperties();
-    }
-
-    private Dictionary<string, double> GetMoneyProperties()
-    {
-        return playerUtils.GetPlayerMoneyCustomProperties();
+        return score < 0 || money < 0;
     }
 }

@@ -41,18 +41,6 @@ namespace Player
             return players.First(player => GetPlayerType(player) == type);
         }
 
-        public Dictionary<string, double> GetPlayerMoneyCustomProperties()
-        {
-            return (Dictionary<string, double>)CustomPropertyUtils.GetCustomPropertyByKey(
-                CustomPropertyKeys.PlayerMoney);
-        }
-
-        public Dictionary<string, double> GetPlayerScoreCustomProperties()
-        {
-            return (Dictionary<string, double>)CustomPropertyUtils.GetCustomPropertyByKey(
-                CustomPropertyKeys.PlayerScore);
-        }
-
         public PlayerType GetPlayerType(PhotonPlayer player)
         {
             return (PlayerType)CustomPropertyUtils.GetPlayerCustomPropertyByKey(CustomPropertyKeys.PlayerType, player);

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using ExitGames.Client.Photon;
 using Photon.Pun;
 using Photon.Realtime;
@@ -23,7 +22,6 @@ namespace Room
             PhotonNetwork.SetPlayerCustomProperties(GetPlayerCustomProperties());
             var roomOptions = new RoomOptions
             {
-                CustomRoomProperties = GetCustomProperties(),
                 MaxPlayers = 2,
                 PublishUserId = true
             };
@@ -43,18 +41,6 @@ namespace Room
             var properties = new Hashtable
             {
                 { CustomPropertyKeys.PlayerType.ToString(), _playerType },
-            };
-            return properties;
-        }
-
-        private static Hashtable GetCustomProperties()
-        {
-            var dictionary = new Dictionary<string, double>();
-
-            var properties = new Hashtable
-            {
-                { CustomPropertyKeys.PlayerMoney.ToString(), dictionary },
-                { CustomPropertyKeys.PlayerScore.ToString(), dictionary },
             };
             return properties;
         }

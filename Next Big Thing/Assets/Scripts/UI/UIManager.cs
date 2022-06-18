@@ -7,6 +7,7 @@ namespace UI
     {
         [SerializeField] private RectTransform winningPanel;
         [SerializeField] private RectTransform losingPanel;
+        [SerializeField] private RectTransform drawPanel;
 
         [SerializeField] private RectTransform yourTurnPanel;
         [SerializeField] private RectTransform otherTurnPanel;
@@ -19,15 +20,11 @@ namespace UI
 
         [SerializeField] private SelectionImpactPointManager impactPointManager;
 
+        private bool _isActivePanel;
+
         public SelectionImpactPointManager GetImpactPointManager()
         {
             return impactPointManager;
-        }
-
-        public void WaitTurnPanelActive(SharedUtils.DelegateMethod method)
-        {
-            WaitGameObjectActive(yourTurnPanel, method);
-            WaitGameObjectActive(otherTurnPanel, method);
         }
 
         public void WaitActionPanelActive(SharedUtils.DelegateMethod method)
@@ -50,20 +47,9 @@ namespace UI
             UIUtils.ExecuteUserAction(userId, ShowLosingPanel, ShowWinningPanel);
         }
 
-        public void ShowScoreValue(string userId, double value)
+        public void ShowDrawPanel()
         {
-            UIUtils.ExecuteUserAction(userId,
-                () => SetScoreValue(myScoreMoneyPanel, value),
-                () => SetScoreValue(otherScoreMoneyPanel, value)
-            );
-        }
-
-        public void ShowMoneyValue(string userId, double value)
-        {
-            UIUtils.ExecuteUserAction(userId,
-                () => SetMoneyValue(myScoreMoneyPanel, value),
-                () => SetMoneyValue(otherScoreMoneyPanel, value)
-            );
+            SetActiveDrawPanel(true);
         }
 
         public void SetActiveUI(bool state)
@@ -75,12 +61,16 @@ namespace UI
 
         public void ShowYourTurn()
         {
+            if (_isActivePanel) return;
+
             SetActiveYourTurnPanel(true);
             WaitForSeconds(() => SetActiveYourTurnPanel(false), 3f);
         }
 
         public void ShowOtherTurnPanel()
         {
+            if (_isActivePanel) return;
+
             SetActiveOtherTurnPanel(true);
             WaitForSeconds(() => SetActiveOtherTurnPanel(false), 3f);
         }
@@ -100,22 +90,62 @@ namespace UI
 
         private void ShowWinningPanel()
         {
-            WaitForSeconds(() => UIUtils.SetActivePanel(winningPanel, true), 1f);
+            SetActiveWinningPanel(true);
         }
 
         private void ShowLosingPanel()
         {
-            WaitForSeconds(() => UIUtils.SetActivePanel(losingPanel, true), 1f);
+            SetActiveLosingPanel(true);
+        }
+
+        public void SetMyScoreValue(double value)
+        {
+            SetScoreValue(myScoreMoneyPanel, value);
+        }
+
+        public void SetOtherScoreValue(double value)
+        {
+            SetScoreValue(otherScoreMoneyPanel, value);
+        }
+
+        public void SetMyMoneyValue(double value)
+        {
+            SetMoneyValue(myScoreMoneyPanel, value);
+        }
+
+        public void SetOtherMoneyValue(double value)
+        {
+            SetMoneyValue(otherScoreMoneyPanel, value);
+        }
+
+        private void SetActiveWinningPanel(bool state)
+        {
+            UIUtils.SetActivePanel(winningPanel, state);
+            _isActivePanel = state;
+        }
+
+        private void SetActiveLosingPanel(bool state)
+        {
+            UIUtils.SetActivePanel(losingPanel, state);
+            _isActivePanel = state;
+        }
+
+        private void SetActiveDrawPanel(bool state)
+        {
+            UIUtils.SetActivePanel(drawPanel, state);
+            _isActivePanel = state;
         }
 
         private void SetActiveYourTurnPanel(bool state)
         {
             UIUtils.SetActivePanel(yourTurnPanel, state);
+            _isActivePanel = state;
         }
 
         private void SetActiveOtherTurnPanel(bool state)
         {
             UIUtils.SetActivePanel(otherTurnPanel, state);
+            _isActivePanel = state;
         }
 
         private void SetActiveLogPanel(bool state)
@@ -136,6 +166,7 @@ namespace UI
         private void SetActiveActionPanel(bool state)
         {
             UIUtils.SetActivePanel(actionPanel, state);
+            _isActivePanel = state;
         }
 
         private static void SetScoreValue(Component panel, double score)
